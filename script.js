@@ -226,7 +226,7 @@ function loadGallery() {
 
 // ---------- СЛУЧАЙНОЕ ФОТО И ФРАЗА ----------
 function getRandomImage() {
-    const randomNum = Math.floor(Math.random() * 40) + 1;
+    const randomNum = Math.floor(Math.random() * 58) + 1;
     return `image/f${randomNum}.jpg`;
 }
 
