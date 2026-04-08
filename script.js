@@ -1,5 +1,5 @@
 // ---------- СПИСОК ВСЕХ ФРАЗ (200+ уникальных) ----------
-const phrasesList = const phrasesList = const phrasesList = [
+const phrasesList = [
     "Я рядом, рыжик. Всегда.",
     "Ты справишься, малыш. Верю в тебя безгранично.",
     "Принцесса, позволь себе сегодня отдохнуть. Ты заслужила.",
@@ -212,7 +212,7 @@ function loadGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
     if (!galleryContainer) return;
 
-    for (let i = 1; i <= 40; i++) {
+    for (let i = 1; i <= 58; i++) {
         const img = document.createElement('img');
         img.src = `image/f${i}.jpg`;
         img.alt = `Фото ${i}`;
