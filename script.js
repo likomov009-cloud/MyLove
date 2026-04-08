@@ -252,23 +252,18 @@ function updateRandomPhrase() {
 let notificationTimers = [];
 
 function scheduleDailyNotifications() {
-    // Очищаем старые таймеры
     notificationTimers.forEach(timer => clearTimeout(timer));
     notificationTimers = [];
 
-    // Получаем разрешение, если ещё не дано
     if (Notification.permission !== 'granted') {
-        // Не просим автоматически, только если пользователь нажмёт кнопку
         return;
     }
 
-    // Генерируем 2 или 3 уведомления на сегодня
-    const count = Math.random() < 0.5 ? 2 : 3; // 2 или 3
+    const count = Math.random() < 0.5 ? 2 : 3;
     const now = new Date();
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Случайные времена в миллисекундах от now до endOfDay
     const times = [];
     for (let i = 0; i < count; i++) {
         let timeMs = now.getTime() + Math.random() * (endOfDay.getTime() - now.getTime());
@@ -283,19 +278,17 @@ function scheduleDailyNotifications() {
                 const phrase = getRandomPhrase();
                 new Notification('Твоя поддержка', {
                     body: phrase,
-                    icon: '/img/icon-192.png' // если иконки нет, можно убрать
+                    icon: '/img/icon-192.png'
                 });
             }, delay);
             notificationTimers.push(timer);
         }
     });
 
-    // Сохраняем в localStorage, чтобы знать, что сегодня уже запланировали
     const todayStr = now.toDateString();
     localStorage.setItem('notificationsScheduled', todayStr);
 }
 
-// Функция для запроса разрешения и запуска планирования
 function requestNotificationPermission() {
     if (Notification.permission === 'granted') {
         scheduleDailyNotifications();
@@ -308,19 +301,16 @@ function requestNotificationPermission() {
     }
 }
 
-// Проверка, нужно ли планировать уведомления сегодня
 function checkAndScheduleNotifications() {
     const todayStr = new Date().toDateString();
     const lastScheduled = localStorage.getItem('notificationsScheduled');
     if (lastScheduled !== todayStr) {
-        // Если разрешение уже есть, планируем
         if (Notification.permission === 'granted') {
             scheduleDailyNotifications();
         }
     }
 }
 
-// Добавляем кнопку для включения уведомлений (во вкладку "Фразы" или отдельно)
 function addNotificationButton() {
     const container = document.querySelector('#phrases .phrase-card-random');
     if (!container) return;
@@ -336,11 +326,64 @@ function addNotificationButton() {
     container.appendChild(btn);
 }
 
-// ---------- УПРАВЛЕНИЕ ВКЛАДКАМИ ----------
+// ---------- ИГРА "СОБЕРИ СЕРДЕЧКИ" ----------
+let currentScore = 0;
+let hearts = [];
+let gameInitialized = false;
+
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.textContent = '❤️';
+    heart.addEventListener('click', () => {
+        currentScore++;
+        const scoreSpan = document.getElementById('scoreValue');
+        if (scoreSpan) scoreSpan.textContent = currentScore;
+        heart.remove();
+        createHeart();
+    });
+    const field = document.getElementById('gameField');
+    if (field) field.appendChild(heart);
+    hearts.push(heart);
+}
+
+function initGame() {
+    const field = document.getElementById('gameField');
+    if (!field) return;
+    field.innerHTML = '';
+    hearts = [];
+    currentScore = 0;
+    const scoreSpan = document.getElementById('scoreValue');
+    if (scoreSpan) scoreSpan.textContent = '0';
+    for (let i = 0; i < 12; i++) {
+        createHeart();
+    }
+}
+
+function resetGame() {
+    initGame();
+}
+
+function bindGameEvents() {
+    const resetBtn = document.getElementById('resetGameBtn');
+    if (resetBtn) {
+        resetBtn.removeEventListener('click', resetGame);
+        resetBtn.addEventListener('click', resetGame);
+    }
+}
+
+function initGameIfNeeded() {
+    if (!gameInitialized && document.getElementById('gameField')) {
+        initGame();
+        bindGameEvents();
+        gameInitialized = true;
+    }
+}
+
+// ---------- УПРАВЛЕНИЕ ВКЛАДКАМИ И ЗАПУСК ----------
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM загружен');
 
-    // Вкладки
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
 
@@ -357,16 +400,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tabId === 'phrases') {
                 updateRandomPhrase();
             }
+            if (tabId === 'game') {
+                setTimeout(initGameIfNeeded, 50);
+            }
         });
     });
     
-    // Загружаем галерею
     loadGallery();
-    
-    // Устанавливаем первую случайную фразу
     updateRandomPhrase();
     
-    // Кнопка "Другая фраза"
     const nextBtn = document.getElementById('nextPhraseBtn');
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
@@ -374,16 +416,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Добавляем кнопку уведомлений
     addNotificationButton();
-    
-    // Проверяем, нужно ли запланировать уведомления на сегодня
     checkAndScheduleNotifications();
     
-    // Service worker регистрируем только если не локальный файл
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         navigator.serviceWorker.register('/sw.js')
             .then(reg => console.log('SW зарегистрирован', reg))
             .catch(err => console.error('Ошибка SW', err));
+    }
+    
+    // Если вкладка игры активна при загрузке
+    if (document.getElementById('game') && document.getElementById('game').classList.contains('active')) {
+        initGameIfNeeded();
     }
 });
