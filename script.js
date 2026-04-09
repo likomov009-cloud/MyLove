@@ -326,57 +326,280 @@ function addNotificationButton() {
     container.appendChild(btn);
 }
 
-// ---------- ИГРА "СОБЕРИ СЕРДЕЧКИ" ----------
-let currentScore = 0;
-let hearts = [];
-let gameInitialized = false;
+// ---------- НОВАЯ ИГРА "СОБЕРИ СЕРДЕЧКИ" (с прогрессом и целями) ----------
+let currentScore = 0;          // счёт за текущую сессию (для красоты)
+let totalHearts = 0;           // общее количество собранных сердечек (всегда растёт)
+let goal = 100;                // цель: каждые 100 сердечек - подарок
+let lastGoalReached = 0;       // чтобы не спамить поздравлениями
+let heartsElements = [];       // массив DOM-элементов сердечек
+let gameActive = true;
 
-function createHeart() {
+// Цвета сердечек (эмодзи)
+const heartColors = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎'];
+let specialHeart = null;            // текущее целевое сердечко (DOM-элемент)
+const specialEmoji = '👑❤️';        // как выглядит целевое сердечко
+
+// Функция для создания нового сердечка (только DOM)
+function createHeartElement() {
     const heart = document.createElement('div');
     heart.className = 'heart';
-    heart.textContent = '❤️';
-    heart.addEventListener('click', () => {
-        currentScore++;
-        const scoreSpan = document.getElementById('scoreValue');
-        if (scoreSpan) scoreSpan.textContent = currentScore;
-        heart.remove();
-        createHeart();
-    });
-    const field = document.getElementById('gameField');
-    if (field) field.appendChild(heart);
-    hearts.push(heart);
+    // случайный цвет
+    const randomColor = heartColors[Math.floor(Math.random() * heartColors.length)];
+    heart.textContent = randomColor;
+    heart.addEventListener('click', () => onHeartClick(heart));
+    return heart;
+}
+function setSpecialHeart(heartElement) {
+    // Убираем special с предыдущего
+    if (specialHeart) {
+        specialHeart.classList.remove('special');
+        // Возвращаем обычный эмодзи (случайный цвет)
+        const oldColor = heartColors[Math.floor(Math.random() * heartColors.length)];
+        specialHeart.textContent = oldColor;
+    }
+    // Назначаем новое
+    specialHeart = heartElement;
+    specialHeart.classList.add('special');
+    specialHeart.textContent = specialEmoji;
 }
 
-function initGame() {
+// Эффект "лопания" и искорки
+function burstEffect(x, y) {
+    // Создаём контейнер для искорок
+    const burst = document.createElement('div');
+    burst.className = 'burst';
+    burst.style.left = x + 'px';
+    burst.style.top = y + 'px';
+    document.body.appendChild(burst);
+    
+    // Генерируем несколько маленьких сердечек ✨
+    for (let i = 0; i < 8; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.textContent = '✨';
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 20 + Math.random() * 40;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        spark.style.setProperty('--tx', tx + 'px');
+        spark.style.setProperty('--ty', ty + 'px');
+        burst.appendChild(spark);
+    }
+    
+    // Удаляем эффект через 0.5 сек
+    setTimeout(() => {
+        burst.remove();
+    }, 500);
+}
+
+// Эффект при клике на неправильное сердечко
+function showWrongClickEffect(heartElement) {
+    // 1. Тряска сердечка
+    heartElement.style.animation = 'shake 0.3s ease-in-out';
+    setTimeout(() => {
+        if (heartElement) heartElement.style.animation = '';
+    }, 300);
+    
+    // 2. Плавающая надпись "Не то!"
+    const wrongText = document.createElement('div');
+    wrongText.textContent = '❌ Не то!';
+    wrongText.className = 'wrong-feedback';
+    const rect = heartElement.getBoundingClientRect();
+    wrongText.style.left = rect.left + rect.width/2 + 'px';
+    wrongText.style.top = rect.top - 20 + 'px';
+    document.body.appendChild(wrongText);
+    setTimeout(() => {
+        wrongText.remove();
+    }, 800);
+    
+    // 3. Лёгкое покраснение фона игрового поля
+    const field = document.getElementById('gameField');
+    if (field) {
+        field.style.transition = 'background 0.2s';
+        field.style.backgroundColor = '#ffe0e0';
+        setTimeout(() => {
+            field.style.backgroundColor = '';
+        }, 200);
+    }
+}
+
+// Обработчик клика по сердечку
+function onHeartClick(heartElement) {
+    if (!gameActive) return;
+    
+    // Если кликнули НЕ на special – показываем эффект ошибки
+    if (heartElement !== specialHeart) {
+        showWrongClickEffect(heartElement);
+        return;
+    }
+    
+    // === Клик по special ===
+    const rect = heartElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Анимация исчезновения
+    heartElement.style.transform = 'scale(0)';
+    heartElement.style.opacity = '0';
+    burstEffect(centerX, centerY);
+    
+    // Увеличиваем счётчики
+    currentScore++;
+    totalHearts++;
+    localStorage.setItem('totalHearts', totalHearts);
+    updateScoreUI();
+    checkGoal();
+    
+    // Удаляем это сердечко из DOM и массива
+    heartElement.remove();
+    const index = heartsElements.indexOf(heartElement);
+    if (index !== -1) heartsElements.splice(index, 1);
+    
+    // Через небольшую задержку создаём новое сердечко и назначаем новое special
+    setTimeout(() => {
+        if (gameActive) {
+            addOneHeart();
+            const currentHearts = document.querySelectorAll('#gameField .heart');
+            if (currentHearts.length > 0) {
+                const randomIndex = Math.floor(Math.random() * currentHearts.length);
+                const newSpecial = currentHearts[randomIndex];
+                setSpecialHeart(newSpecial);
+            }
+        }
+    }, 200);
+}
+// Добавить одно сердечко в поле
+function addOneHeart() {
+    const field = document.getElementById('gameField');
+    if (!field) return;
+    const newHeart = createHeartElement();
+    field.appendChild(newHeart);
+    heartsElements.push(newHeart);
+    newHeart.style.animation = 'none';
+    newHeart.offsetHeight;
+    newHeart.style.animation = 'float 0.3s ease-out';
+    // Не делаем special здесь, special будет назначен позже отдельно
+}
+// Инициализация поля: создаём 12 сердечек
+function initGameField() {
     const field = document.getElementById('gameField');
     if (!field) return;
     field.innerHTML = '';
-    hearts = [];
-    currentScore = 0;
-    const scoreSpan = document.getElementById('scoreValue');
-    if (scoreSpan) scoreSpan.textContent = '0';
+    heartsElements = [];
     for (let i = 0; i < 12; i++) {
-        createHeart();
+        const heart = createHeartElement();
+        field.appendChild(heart);
+        heartsElements.push(heart);
+    }
+    // Назначаем первое special случайным образом
+    if (heartsElements.length > 0) {
+        const randomIndex = Math.floor(Math.random() * heartsElements.length);
+        setSpecialHeart(heartsElements[randomIndex]);
+    }
+}
+// Обновить UI: текущий счёт, общий счёт, прогресс-бар
+function updateScoreUI() {
+    const currentSpan = document.getElementById('currentScoreValue');
+    if (currentSpan) currentSpan.textContent = currentScore;
+    
+    const totalSpan = document.getElementById('totalHeartsValue');
+    if (totalSpan) totalSpan.textContent = totalHearts;
+    
+    // Прогресс до следующей цели
+    const nextGoal = Math.ceil(totalHearts / goal) * goal;
+    const remaining = nextGoal - totalHearts;
+    const progressPercent = (totalHearts % goal) / goal * 100;
+    
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) {
+        progressFill.style.width = progressPercent + '%';
+    }
+    
+    const remainingSpan = document.getElementById('remainingToGoal');
+    if (remainingSpan) {
+        remainingSpan.textContent = remaining;
+    }
+    
+    const goalSpan = document.getElementById('goalValue');
+    if (goalSpan) {
+        goalSpan.textContent = goal;
     }
 }
 
-function resetGame() {
-    initGame();
+// Проверить, достигнута ли новая цель (каждые goal штук)
+function checkGoal() {
+    const currentMilestone = Math.floor(totalHearts / goal);
+    if (currentMilestone > lastGoalReached && totalHearts > 0) {
+        lastGoalReached = currentMilestone;
+        // Показываем поздравление
+        const giftNumber = currentMilestone;
+        let giftText = '';
+        if (giftNumber % 2 === 0) {
+            giftText = 'чипсы 🍟';
+        } else {
+            giftText = 'шоколадку 🍫';
+        }
+        // Можно чередовать: за 100 - шоколадка, за 200 - чипсы, за 300 - шоколадка и т.д.
+        const message = `🎉 Поздравляю! Ты собрала ${totalHearts} сердечек! 🎉\nЯ дарю тебе ${giftText}! ❤️\nОбниму при встрече!`;
+        alert(message);
+        // Дополнительно можно вывести красивое модальное окно, но для простоты alert
+    }
 }
 
-function bindGameEvents() {
+// Сброс текущей сессии (не обнуляет totalHearts)
+function resetGameSession() {
+    currentScore = 0;
+    updateScoreUI();
+    initGameField();  // эта функция сама назначит new special
+}
+
+// Полная инициализация игры (вызывается один раз)
+function initGame() {
+    const gameContainer = document.querySelector('#game .game-container');
+    if (!gameContainer) return;
+    
+    // Проверяем, добавлены ли уже дополнительные элементы (чтобы не дублировать)
+    if (!document.getElementById('gameStats')) {
+        // Создаём блок статистики и прогресса
+        const statsDiv = document.createElement('div');
+        statsDiv.id = 'gameStats';
+        statsDiv.className = 'game-stats';
+        statsDiv.innerHTML = `
+            <div class="score-row">
+                <div>❤️ За этот раз: <span id="currentScoreValue">0</span></div>
+                <div>🌟 Всего собрано: <span id="totalHeartsValue">0</span></div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label">До следующего подарка (каждые <span id="goalValue">100</span> ❤️):</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-remaining">Осталось <span id="remainingToGoal">100</span> сердечек</div>
+            </div>
+        `;
+        // Вставляем перед игровым полем
+        const field = document.getElementById('gameField');
+        gameContainer.insertBefore(statsDiv, field);
+    }
+    
+    // Загружаем общий счёт из localStorage
+    const savedTotal = localStorage.getItem('totalHearts');
+    if (savedTotal !== null) {
+        totalHearts = parseInt(savedTotal, 10);
+    } else {
+        totalHearts = 0;
+    }
+    currentScore = 0;
+    lastGoalReached = Math.floor(totalHearts / goal);
+    
+    // Инициализируем поле
+    initGameField();
+    updateScoreUI();
+    
+    // Привязываем кнопку сброса
     const resetBtn = document.getElementById('resetGameBtn');
     if (resetBtn) {
-        resetBtn.removeEventListener('click', resetGame);
-        resetBtn.addEventListener('click', resetGame);
-    }
-}
-
-function initGameIfNeeded() {
-    if (!gameInitialized && document.getElementById('gameField')) {
-        initGame();
-        bindGameEvents();
-        gameInitialized = true;
+        resetBtn.onclick = () => resetGameSession();
     }
 }
 
@@ -401,7 +624,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateRandomPhrase();
             }
             if (tabId === 'game') {
-                setTimeout(initGameIfNeeded, 50);
+                // Если игра ещё не инициализирована, инициализируем
+                if (!window.gameInitialized) {
+                    initGame();
+                    window.gameInitialized = true;
+                } else {
+                    // просто обновляем UI на случай, если счёт поменялся где-то ещё
+                    updateScoreUI();
+                }
             }
         });
     });
@@ -425,8 +655,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Ошибка SW', err));
     }
     
-    // Если вкладка игры активна при загрузке
+    // Если вкладка игры активна при загрузке, инициализируем
     if (document.getElementById('game') && document.getElementById('game').classList.contains('active')) {
-        initGameIfNeeded();
+        if (!window.gameInitialized) {
+            initGame();
+            window.gameInitialized = true;
+        }
     }
 });
