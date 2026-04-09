@@ -1,4 +1,4 @@
-// ---------- СПИСОК ВСЕХ ФРАЗ (200+ уникальных) ----------
+// ---------- СПИСОК ФРАЗ ----------
 const phrasesList = [
     "Я рядом, рыжик. Всегда.",
     "Ты справишься, малыш. Верю в тебя безгранично.",
@@ -207,19 +207,16 @@ const phrasesList = [
     "Родная, ты - моё вдохновение."
 ];
 
-// ---------- ГАЛЕРЕЯ ФОТО ----------
+// ---------- ГАЛЕРЕЯ ----------
 function loadGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
     if (!galleryContainer) return;
-
     for (let i = 1; i <= 58; i++) {
         const img = document.createElement('img');
         img.src = `image/f${i}.jpg`;
         img.alt = `Фото ${i}`;
         img.loading = 'lazy';
-        img.onerror = () => {
-            img.style.display = 'none';
-        };
+        img.onerror = () => img.style.display = 'none';
         galleryContainer.appendChild(img);
     }
 }
@@ -229,17 +226,13 @@ function getRandomImage() {
     const randomNum = Math.floor(Math.random() * 58) + 1;
     return `image/f${randomNum}.jpg`;
 }
-
 function getRandomPhrase() {
     return phrasesList[Math.floor(Math.random() * phrasesList.length)];
 }
-
 function updateRandomPhrase() {
     const phraseText = document.getElementById('randomPhraseText');
     const phraseImage = document.getElementById('randomPhraseImage');
-    if (phraseText) {
-        phraseText.textContent = getRandomPhrase();
-    }
+    if (phraseText) phraseText.textContent = getRandomPhrase();
     if (phraseImage) {
         phraseImage.src = getRandomImage();
         phraseImage.onerror = () => {
@@ -250,67 +243,43 @@ function updateRandomPhrase() {
 
 // ---------- УВЕДОМЛЕНИЯ ----------
 let notificationTimers = [];
-
 function scheduleDailyNotifications() {
     notificationTimers.forEach(timer => clearTimeout(timer));
     notificationTimers = [];
-
-    if (Notification.permission !== 'granted') {
-        return;
-    }
-
+    if (Notification.permission !== 'granted') return;
     const count = Math.random() < 0.5 ? 2 : 3;
     const now = new Date();
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
-
     const times = [];
     for (let i = 0; i < count; i++) {
         let timeMs = now.getTime() + Math.random() * (endOfDay.getTime() - now.getTime());
         times.push(timeMs);
     }
     times.sort((a, b) => a - b);
-
     times.forEach(timeMs => {
         const delay = timeMs - now.getTime();
         if (delay > 0) {
             const timer = setTimeout(() => {
                 const phrase = getRandomPhrase();
-                new Notification('Твоя поддержка', {
-                    body: phrase,
-                    icon: '/img/icon-192.png'
-                });
+                new Notification('Твоя поддержка', { body: phrase, icon: '/img/icon-192.png' });
             }, delay);
             notificationTimers.push(timer);
         }
     });
-
-    const todayStr = now.toDateString();
-    localStorage.setItem('notificationsScheduled', todayStr);
+    localStorage.setItem('notificationsScheduled', now.toDateString());
 }
-
 function requestNotificationPermission() {
-    if (Notification.permission === 'granted') {
-        scheduleDailyNotifications();
-    } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(perm => {
-            if (perm === 'granted') {
-                scheduleDailyNotifications();
-            }
-        });
+    if (Notification.permission === 'granted') scheduleDailyNotifications();
+    else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(perm => { if (perm === 'granted') scheduleDailyNotifications(); });
     }
 }
-
 function checkAndScheduleNotifications() {
     const todayStr = new Date().toDateString();
     const lastScheduled = localStorage.getItem('notificationsScheduled');
-    if (lastScheduled !== todayStr) {
-        if (Notification.permission === 'granted') {
-            scheduleDailyNotifications();
-        }
-    }
+    if (lastScheduled !== todayStr && Notification.permission === 'granted') scheduleDailyNotifications();
 }
-
 function addNotificationButton() {
     const container = document.querySelector('#phrases .phrase-card-random');
     if (!container) return;
@@ -326,53 +295,64 @@ function addNotificationButton() {
     container.appendChild(btn);
 }
 
-// ---------- НОВАЯ ИГРА "СОБЕРИ СЕРДЕЧКИ" (с прогрессом и целями) ----------
-let currentScore = 0;          // счёт за текущую сессию (для красоты)
-let totalHearts = 0;           // общее количество собранных сердечек (всегда растёт)
-let goal = 100;                // цель: каждые 100 сердечек - подарок
-let lastGoalReached = 0;       // чтобы не спамить поздравлениями
-let heartsElements = [];       // массив DOM-элементов сердечек
+// ---------- ИГРА ----------
+let currentScore = 0;
+let totalHearts = 0;
+let goal = 100;
+let lastGoalReached = 0;
+let heartsElements = [];
 let gameActive = true;
-
-// Цвета сердечек (эмодзи)
 const heartColors = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎'];
-let specialHeart = null;            // текущее целевое сердечко (DOM-элемент)
-const specialEmoji = '👑❤️';        // как выглядит целевое сердечко
+let specialHeart = null;
+const specialEmoji = '👑❤️';
 
-// Функция для создания нового сердечка (только DOM)
 function createHeartElement() {
     const heart = document.createElement('div');
     heart.className = 'heart';
-    // случайный цвет
-    const randomColor = heartColors[Math.floor(Math.random() * heartColors.length)];
-    heart.textContent = randomColor;
+    heart.textContent = heartColors[Math.floor(Math.random() * heartColors.length)];
     heart.addEventListener('click', () => onHeartClick(heart));
     return heart;
 }
+
 function setSpecialHeart(heartElement) {
-    // Убираем special с предыдущего
     if (specialHeart) {
         specialHeart.classList.remove('special');
-        // Возвращаем обычный эмодзи (случайный цвет)
-        const oldColor = heartColors[Math.floor(Math.random() * heartColors.length)];
-        specialHeart.textContent = oldColor;
+        specialHeart.textContent = heartColors[Math.floor(Math.random() * heartColors.length)];
     }
-    // Назначаем новое
     specialHeart = heartElement;
     specialHeart.classList.add('special');
     specialHeart.textContent = specialEmoji;
 }
 
-// Эффект "лопания" и искорки
+// Звуки (инициализация будет при первом клике)
+let audioContext = null;
+function initAudio() {
+    if (audioContext) return;
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+}
+function playBeep(frequency, duration, type = 'sine') {
+    if (!audioContext) return;
+    const now = audioContext.currentTime;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.frequency.value = frequency;
+    osc.type = type;
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.start();
+    osc.stop(now + duration);
+}
+function playCorrectSound() { playBeep(880, 0.15, 'sine'); }
+function playWrongSound() { playBeep(440, 0.2, 'triangle'); }
+
 function burstEffect(x, y) {
-    // Создаём контейнер для искорок
     const burst = document.createElement('div');
     burst.className = 'burst';
     burst.style.left = x + 'px';
     burst.style.top = y + 'px';
     document.body.appendChild(burst);
-    
-    // Генерируем несколько маленьких сердечек ✨
     for (let i = 0; i < 8; i++) {
         const spark = document.createElement('div');
         spark.className = 'spark';
@@ -385,22 +365,12 @@ function burstEffect(x, y) {
         spark.style.setProperty('--ty', ty + 'px');
         burst.appendChild(spark);
     }
-    
-    // Удаляем эффект через 0.5 сек
-    setTimeout(() => {
-        burst.remove();
-    }, 500);
+    setTimeout(() => burst.remove(), 500);
 }
 
-// Эффект при клике на неправильное сердечко
 function showWrongClickEffect(heartElement) {
-    // 1. Тряска сердечка
     heartElement.style.animation = 'shake 0.3s ease-in-out';
-    setTimeout(() => {
-        if (heartElement) heartElement.style.animation = '';
-    }, 300);
-    
-    // 2. Плавающая надпись "Не то!"
+    setTimeout(() => { if (heartElement) heartElement.style.animation = ''; }, 300);
     const wrongText = document.createElement('div');
     wrongText.textContent = '❌ Не то!';
     wrongText.className = 'wrong-feedback';
@@ -408,67 +378,49 @@ function showWrongClickEffect(heartElement) {
     wrongText.style.left = rect.left + rect.width/2 + 'px';
     wrongText.style.top = rect.top - 20 + 'px';
     document.body.appendChild(wrongText);
-    setTimeout(() => {
-        wrongText.remove();
-    }, 800);
-    
-    // 3. Лёгкое покраснение фона игрового поля
+    setTimeout(() => wrongText.remove(), 800);
     const field = document.getElementById('gameField');
     if (field) {
         field.style.transition = 'background 0.2s';
         field.style.backgroundColor = '#ffe0e0';
-        setTimeout(() => {
-            field.style.backgroundColor = '';
-        }, 200);
+        setTimeout(() => { field.style.backgroundColor = ''; }, 200);
     }
+    playWrongSound();
 }
 
-// Обработчик клика по сердечку
 function onHeartClick(heartElement) {
     if (!gameActive) return;
-    
-    // Если кликнули НЕ на special – показываем эффект ошибки
     if (heartElement !== specialHeart) {
         showWrongClickEffect(heartElement);
         return;
     }
-    
-    // === Клик по special ===
+    // первый клик — инициализируем звук
+    if (!audioContext) initAudio();
+    playCorrectSound();
     const rect = heartElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    // Анимация исчезновения
+    burstEffect(rect.left + rect.width/2, rect.top + rect.height/2);
     heartElement.style.transform = 'scale(0)';
     heartElement.style.opacity = '0';
-    burstEffect(centerX, centerY);
-    
-    // Увеличиваем счётчики
     currentScore++;
     totalHearts++;
     localStorage.setItem('totalHearts', totalHearts);
     updateScoreUI();
     checkGoal();
-    
-    // Удаляем это сердечко из DOM и массива
     heartElement.remove();
     const index = heartsElements.indexOf(heartElement);
     if (index !== -1) heartsElements.splice(index, 1);
-    
-    // Через небольшую задержку создаём новое сердечко и назначаем новое special
     setTimeout(() => {
         if (gameActive) {
             addOneHeart();
             const currentHearts = document.querySelectorAll('#gameField .heart');
             if (currentHearts.length > 0) {
                 const randomIndex = Math.floor(Math.random() * currentHearts.length);
-                const newSpecial = currentHearts[randomIndex];
-                setSpecialHeart(newSpecial);
+                setSpecialHeart(currentHearts[randomIndex]);
             }
         }
     }, 200);
 }
-// Добавить одно сердечко в поле
+
 function addOneHeart() {
     const field = document.getElementById('gameField');
     if (!field) return;
@@ -478,9 +430,8 @@ function addOneHeart() {
     newHeart.style.animation = 'none';
     newHeart.offsetHeight;
     newHeart.style.animation = 'float 0.3s ease-out';
-    // Не делаем special здесь, special будет назначен позже отдельно
 }
-// Инициализация поля: создаём 12 сердечек
+
 function initGameField() {
     const field = document.getElementById('gameField');
     if (!field) return;
@@ -491,76 +442,45 @@ function initGameField() {
         field.appendChild(heart);
         heartsElements.push(heart);
     }
-    // Назначаем первое special случайным образом
     if (heartsElements.length > 0) {
-        const randomIndex = Math.floor(Math.random() * heartsElements.length);
-        setSpecialHeart(heartsElements[randomIndex]);
-    }
-}
-// Обновить UI: текущий счёт, общий счёт, прогресс-бар
-function updateScoreUI() {
-    const currentSpan = document.getElementById('currentScoreValue');
-    if (currentSpan) currentSpan.textContent = currentScore;
-    
-    const totalSpan = document.getElementById('totalHeartsValue');
-    if (totalSpan) totalSpan.textContent = totalHearts;
-    
-    // Прогресс до следующей цели
-    const nextGoal = Math.ceil(totalHearts / goal) * goal;
-    const remaining = nextGoal - totalHearts;
-    const progressPercent = (totalHearts % goal) / goal * 100;
-    
-    const progressFill = document.getElementById('progressFill');
-    if (progressFill) {
-        progressFill.style.width = progressPercent + '%';
-    }
-    
-    const remainingSpan = document.getElementById('remainingToGoal');
-    if (remainingSpan) {
-        remainingSpan.textContent = remaining;
-    }
-    
-    const goalSpan = document.getElementById('goalValue');
-    if (goalSpan) {
-        goalSpan.textContent = goal;
+        setSpecialHeart(heartsElements[Math.floor(Math.random() * heartsElements.length)]);
     }
 }
 
-// Проверить, достигнута ли новая цель (каждые goal штук)
+function updateScoreUI() {
+    const currentSpan = document.getElementById('currentScoreValue');
+    if (currentSpan) currentSpan.textContent = currentScore;
+    const totalSpan = document.getElementById('totalHeartsValue');
+    if (totalSpan) totalSpan.textContent = totalHearts;
+    const progressPercent = (totalHearts % goal) / goal * 100;
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) progressFill.style.width = progressPercent + '%';
+    const remainingSpan = document.getElementById('remainingToGoal');
+    if (remainingSpan) remainingSpan.textContent = (Math.ceil(totalHearts / goal) * goal) - totalHearts;
+    const goalSpan = document.getElementById('goalValue');
+    if (goalSpan) goalSpan.textContent = goal;
+}
+
 function checkGoal() {
     const currentMilestone = Math.floor(totalHearts / goal);
     if (currentMilestone > lastGoalReached && totalHearts > 0) {
         lastGoalReached = currentMilestone;
-        // Показываем поздравление
-        const giftNumber = currentMilestone;
-        let giftText = '';
-        if (giftNumber % 2 === 0) {
-            giftText = 'чипсы 🍟';
-        } else {
-            giftText = 'шоколадку 🍫';
-        }
-        // Можно чередовать: за 100 - шоколадка, за 200 - чипсы, за 300 - шоколадка и т.д.
-        const message = `🎉 Поздравляю! Ты собрала ${totalHearts} сердечек! 🎉\nЯ дарю тебе ${giftText}! ❤️\nОбниму при встрече!`;
-        alert(message);
-        // Дополнительно можно вывести красивое модальное окно, но для простоты alert
+        const giftText = (currentMilestone % 2 === 0) ? 'чипсы 🍟' : 'шоколадку 🍫';
+        alert(`🎉 Поздравляю! Ты собрала ${totalHearts} сердечек! 🎉\nЯ дарю тебе ${giftText}! ❤️\nОбниму при встрече!`);
     }
+    checkAchievements(totalHearts);
 }
 
-// Сброс текущей сессии (не обнуляет totalHearts)
 function resetGameSession() {
     currentScore = 0;
     updateScoreUI();
-    initGameField();  // эта функция сама назначит new special
+    initGameField();
 }
 
-// Полная инициализация игры (вызывается один раз)
 function initGame() {
     const gameContainer = document.querySelector('#game .game-container');
     if (!gameContainer) return;
-    
-    // Проверяем, добавлены ли уже дополнительные элементы (чтобы не дублировать)
     if (!document.getElementById('gameStats')) {
-        // Создаём блок статистики и прогресса
         const statsDiv = document.createElement('div');
         statsDiv.id = 'gameStats';
         statsDiv.className = 'game-stats';
@@ -571,95 +491,259 @@ function initGame() {
             </div>
             <div class="progress-container">
                 <div class="progress-label">До следующего подарка (каждые <span id="goalValue">100</span> ❤️):</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
                 <div class="progress-remaining">Осталось <span id="remainingToGoal">100</span> сердечек</div>
             </div>
         `;
-        // Вставляем перед игровым полем
-        const field = document.getElementById('gameField');
-        gameContainer.insertBefore(statsDiv, field);
+        gameContainer.insertBefore(statsDiv, document.getElementById('gameField'));
     }
-    
-    // Загружаем общий счёт из localStorage
     const savedTotal = localStorage.getItem('totalHearts');
-    if (savedTotal !== null) {
-        totalHearts = parseInt(savedTotal, 10);
-    } else {
-        totalHearts = 0;
-    }
+    totalHearts = savedTotal ? parseInt(savedTotal, 10) : 0;
     currentScore = 0;
     lastGoalReached = Math.floor(totalHearts / goal);
-    
-    // Инициализируем поле
     initGameField();
     updateScoreUI();
-    
-    // Привязываем кнопку сброса
     const resetBtn = document.getElementById('resetGameBtn');
-    if (resetBtn) {
-        resetBtn.onclick = () => resetGameSession();
+    if (resetBtn) resetBtn.onclick = () => resetGameSession();
+}
+
+// ---------- МУЗЫКА (MP3 из папки audio) с переключением треков ----------
+const trackList = [
+    'audio/background1.mp3',
+    'audio/background2.mp3',
+    'audio/background3.mp3'
+];
+let currentTrackIndex = 0;      // 0,1,2
+let bgMusic = null;
+let isMusicPlaying = false;
+
+function initMusic() {
+    if (bgMusic) {
+        // Если уже создан, просто меняем src
+        bgMusic.src = trackList[currentTrackIndex];
+        return;
+    }
+    bgMusic = new Audio(trackList[currentTrackIndex]);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.5;
+    bgMusic.addEventListener('error', (e) => {
+        console.error('Ошибка загрузки музыки:', bgMusic.error);
+        alert(`Не удалось загрузить ${trackList[currentTrackIndex]}. Проверь путь и файлы.`);
+        const trackBtns = document.querySelectorAll('.track-btn');
+        trackBtns.forEach(btn => btn.disabled = true);
+    });
+}
+
+function loadTrack(index) {
+    if (!bgMusic) {
+        initMusic();
+    } else {
+        const wasPlaying = isMusicPlaying;
+        if (wasPlaying) {
+            bgMusic.pause();
+        }
+        bgMusic.src = trackList[index];
+        bgMusic.load();
+        if (wasPlaying) {
+            bgMusic.play().catch(err => console.warn('Автовоспроизведение заблокировано:', err));
+        }
+    }
+    updateTrackIndicator();
+}
+
+function prevTrack() {
+    currentTrackIndex = (currentTrackIndex - 1 + trackList.length) % trackList.length;
+    loadTrack(currentTrackIndex);
+}
+
+function nextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % trackList.length;
+    loadTrack(currentTrackIndex);
+}
+
+function startMusic() {
+    if (!bgMusic) initMusic();
+    if (!bgMusic || isMusicPlaying) return;
+    bgMusic.play().then(() => {
+        isMusicPlaying = true;
+        updateMusicButtonUI();
+    }).catch(err => {
+        console.warn('Автовоспроизведение заблокировано:', err);
+        alert('Нажми на кнопку музыки ещё раз – браузер требует явного клика.');
+        isMusicPlaying = false;
+        updateMusicButtonUI();
+    });
+}
+
+function stopMusic() {
+    if (!bgMusic) return;
+    bgMusic.pause();
+    isMusicPlaying = false;
+    updateMusicButtonUI();
+}
+
+function toggleMusic() {
+    if (!bgMusic) initMusic();
+    if (isMusicPlaying) {
+        stopMusic();
+    } else {
+        startMusic();
     }
 }
 
-// ---------- УПРАВЛЕНИЕ ВКЛАДКАМИ И ЗАПУСК ----------
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM загружен');
+function updateMusicButtonUI() {
+    const btn = document.getElementById('musicToggleBtn');
+    if (btn) btn.textContent = isMusicPlaying ? '🔊' : '🔇';
+}
 
+function updateTrackIndicator() {
+    const indicator = document.getElementById('trackIndicator');
+    if (indicator) {
+        indicator.textContent = `${currentTrackIndex+1}/${trackList.length}`;
+    }
+}
+
+// Создаём панель управления музыкой (кнопка вкл/выкл + переключение треков)
+function createMusicPlayer() {
+    // Удаляем старую кнопку, если есть
+    const oldBtn = document.getElementById('musicToggleBtn');
+    if (oldBtn) oldBtn.remove();
+    
+    const container = document.createElement('div');
+    container.className = 'music-player';
+    
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '◀';
+    prevBtn.className = 'track-btn';
+    prevBtn.title = 'Предыдущая песня';
+    prevBtn.onclick = (e) => { e.stopPropagation(); prevTrack(); };
+    
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'musicToggleBtn';
+    toggleBtn.textContent = '🔇';
+    toggleBtn.className = 'music-toggle';
+    toggleBtn.onclick = (e) => { e.stopPropagation(); toggleMusic(); };
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '▶';
+    nextBtn.className = 'track-btn';
+    nextBtn.title = 'Следующая песня';
+    nextBtn.onclick = (e) => { e.stopPropagation(); nextTrack(); };
+    
+    const indicator = document.createElement('span');
+    indicator.id = 'trackIndicator';
+    indicator.className = 'track-indicator';
+    indicator.textContent = `1/${trackList.length}`;
+    
+    container.appendChild(prevBtn);
+    container.appendChild(toggleBtn);
+    container.appendChild(nextBtn);
+    container.appendChild(indicator);
+    
+    document.body.appendChild(container);
+}
+
+// ---------- ДОСТИЖЕНИЯ ----------
+const achievements = [
+    { id: 1, name: 'Первые шаги', desc: 'Собрать 50 сердечек', target: 50, icon: '👣', unlocked: false },
+    { id: 2, name: 'Сердечный друг', desc: 'Собрать 100 сердечек', target: 100, icon: '❤️', unlocked: false },
+    { id: 3, name: 'Тепло души', desc: 'Собрать 250 сердечек', target: 250, icon: '🔥', unlocked: false },
+    { id: 4, name: 'Мастер любви', desc: 'Собрать 500 сердечек', target: 500, icon: '💖', unlocked: false },
+    { id: 5, name: 'Ангел-хранитель', desc: 'Собрать 1000 сердечек', target: 1000, icon: '👼', unlocked: false },
+    { id: 6, name: 'Легенда', desc: 'Собрать 2500 сердечек', target: 2500, icon: '🏆', unlocked: false }
+];
+function loadAchievements() {
+    const saved = localStorage.getItem('achievements');
+    if (saved) {
+        const unlockedIds = JSON.parse(saved);
+        achievements.forEach(ach => { ach.unlocked = unlockedIds.includes(ach.id); });
+    }
+}
+function saveAchievements() {
+    const unlockedIds = achievements.filter(ach => ach.unlocked).map(ach => ach.id);
+    localStorage.setItem('achievements', JSON.stringify(unlockedIds));
+}
+function checkAchievements(currentTotal) {
+    let newUnlock = false;
+    achievements.forEach(ach => {
+        if (!ach.unlocked && currentTotal >= ach.target) {
+            ach.unlocked = true;
+            newUnlock = true;
+            setTimeout(() => alert(`🏆 Новое достижение: ${ach.name}!\n${ach.desc}`), 100);
+        }
+    });
+    if (newUnlock) {
+        saveAchievements();
+        renderAchievements();
+    }
+}
+function renderAchievements() {
+    const container = document.getElementById('achievementsList');
+    if (!container) return;
+    container.innerHTML = '';
+    achievements.forEach(ach => {
+        const card = document.createElement('div');
+        card.className = `achievement-card ${ach.unlocked ? '' : 'locked'}`;
+        card.innerHTML = `
+            <div class="achievement-icon">${ach.icon}</div>
+            <div class="achievement-info">
+                <div class="achievement-title">${ach.name}</div>
+                <div class="achievement-desc">${ach.desc}</div>
+            </div>
+            <div class="achievement-progress">${ach.unlocked ? '✅' : `🔒 ${ach.target}`}</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// ---------- ЗАПУСК ----------
+document.addEventListener('DOMContentLoaded', () => {
+    // Splash
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 500);
+        }
+    }, 1500);
+
+    // Вкладки
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
-
     tabs.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabId = btn.getAttribute('data-tab');
-            
             tabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             contents.forEach(content => content.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            if (tabId === 'phrases') {
-                updateRandomPhrase();
-            }
+            if (tabId === 'phrases') updateRandomPhrase();
             if (tabId === 'game') {
-                // Если игра ещё не инициализирована, инициализируем
-                if (!window.gameInitialized) {
-                    initGame();
-                    window.gameInitialized = true;
-                } else {
-                    // просто обновляем UI на случай, если счёт поменялся где-то ещё
-                    updateScoreUI();
-                }
+                if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
+                else updateScoreUI();
             }
+            if (tabId === 'achievements') renderAchievements();
         });
     });
-    
+
     loadGallery();
     updateRandomPhrase();
-    
-    const nextBtn = document.getElementById('nextPhraseBtn');
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            updateRandomPhrase();
-        });
-    }
-    
+    document.getElementById('nextPhraseBtn')?.addEventListener('click', updateRandomPhrase);
     addNotificationButton();
     checkAndScheduleNotifications();
-    
+
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW зарегистрирован', reg))
-            .catch(err => console.error('Ошибка SW', err));
+        navigator.serviceWorker.register('/sw.js').catch(err => console.error(err));
     }
-    
-    // Если вкладка игры активна при загрузке, инициализируем
-    if (document.getElementById('game') && document.getElementById('game').classList.contains('active')) {
-        if (!window.gameInitialized) {
-            initGame();
-            window.gameInitialized = true;
-        }
+
+    if (document.getElementById('game')?.classList.contains('active')) {
+        if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
     }
+
+    // Кнопка музыки
+        createMusicPlayer();
+
+    // Загружаем достижения
+    loadAchievements();
+    renderAchievements();
 });

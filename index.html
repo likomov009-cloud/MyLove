@@ -9,71 +9,88 @@
     <meta name="theme-color" content="#f7c1b5">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Ты не одна ❤️</h1>
-            <p>Я всегда рядом, даже когда далеко, принцесса</p>
-        </header>
 
-        <nav class="tabs">
-            <button class="tab-btn active" data-tab="words">Слова</button>
-            <button class="tab-btn" data-tab="photos">Фото</button>
-            <button class="tab-btn" data-tab="phrases">Фразы</button>
-            <button class="tab-btn" data-tab="letter">Письмо</button>
-            <button class="tab-btn" data-tab="game">Моя игра для тебя</button>
-        </nav>
+<!-- Splash screen -->
+<div id="splash" class="splash">
+    <div class="splash-content">
+        <div class="splash-heart">❤️</div>
+        <p>Загружаю тепло...</p>
+    </div>
+</div>
 
-        <!-- Слова -->
-        <div class="tab-content active" id="words">
-            <div class="card">
-                <p>Моя хорошая, я помню все твои эмоции в те дни. Ты прошла через боль, которую не пожелаешь никому. И ты выстояла. Твоя сила — в твоей нежности, запомни это.</p>
-                <p>Твой брат всегда с тобой. В каждой твоей улыбке, в каждом воспоминании, в каждом шаге. Он живёт в твоём сердце — и это сердце такое большое, что хватит места и для радости, и для светлой грусти.</p>
-                <p>Теперь я рядом. Каждый день. Могу обнять, когда захочешь. Но пусть это приложение останется местом, куда можно заглянуть в минуту тишины — и почувствовать, что ты не одна. Никогда.</p>
-                <p>Я люблю тебя, моя маленькая девочка. Ты справляешься так, что я горжусь каждым твоим днём.</p>
-            </div>
-        </div>
+<div class="container">
+    <header>
+        <h1>Ты не одна ❤️</h1>
+        <p>Я всегда рядом, даже когда далеко, принцесса</p>
+    </header>
 
-        <!-- Фото -->
-        <div class="tab-content" id="photos">
-            <div class="gallery" id="galleryContainer"></div>
-        </div>
+    <nav class="tabs">
+        <button class="tab-btn active" data-tab="words">Слова</button>
+        <button class="tab-btn" data-tab="photos">Фото</button>
+        <button class="tab-btn" data-tab="phrases">Фразы</button>
+        <button class="tab-btn" data-tab="letter">Письмо</button>
+        <button class="tab-btn" data-tab="game">Игра</button>
+        <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
+    </nav>
 
-        <!-- Фразы -->
-        <div class="tab-content" id="phrases">
-            <div class="phrase-card-random">
-                <div class="phrase-image">
-                    <img id="randomPhraseImage" src="" alt="Фото">
-                </div>
-                <div class="phrase-text" id="randomPhraseText">
-                    Здесь будет фраза
-                </div>
-                <button id="nextPhraseBtn" class="next-phrase-btn">💫 Другая фраза</button>
-            </div>
-        </div>
-
-        <!-- Письмо -->
-        <div class="tab-content" id="letter">
-            <div class="card letter">
-                <p>Моя родная,</p>
-                <p>Мне очень грустно, что я не могу быть всегда рядом с тобой физически, что не могу каждый день просыпаится рядом с тобой и засыпать. Но я обещал: это приложение будет держать тебя за руку в самые тёмные минуты. Теперь ты вернулась, и я могу обнимать тебя каждый день. Но я оставляю эти слова здесь — навсегда.</p>
-                <p>Твой брат — герой. А ты — его продолжение. Он смотрит на тебя и видит, как ты живёшь, как улыбаешься, как помнишь. И это самое лучшее, что ты можешь для него сделать.</p>
-                <p>Мы теперь вместе. Я могу обнять тебя, когда грустно, могу разделить с тобой тишину или смех. Но если вдруг ночью или днём тебе захочется услышать что-то тёплое — открой это приложение. Здесь всё ещё я. Здесь всё ещё моя любовь к тебе.</p>
-                <p>Нажимай «Другая фраза» — пусть поддержка приходит неожиданно, как мои мысли о тебе. Ты — моё всё.</p>
-                <p>Твой навсегда. Спасибо, что ты у меня есть. ❤️</p>
-            </div>
-        </div>
-
-        <!-- Игра -->
-        <div class="tab-content" id="game">
-            <div class="game-container">
-                <h2>Собери сердечки, роднуля моя ❤️</h2>
-                <p>Кликай на сердечки — каждое приносит тепло</p>
-                <div class="game-field" id="gameField"></div>
-                <button id="resetGameBtn" class="next-phrase-btn">🔄 Начать заново</button>
-            </div>
+    <!-- Слова -->
+    <div class="tab-content active" id="words">
+        <div class="card">
+            <p>Моя хорошая, я помню все твои эмоции в те дни. Ты прошла через боль, которую не пожелаешь никому. И ты выстояла. Твоя сила — в твоей нежности, запомни это.</p>
+            <p>Твой брат всегда с тобой. В каждой твоей улыбке, в каждом воспоминании, в каждом шаге. Он живёт в твоём сердце — и это сердце такое большое, что хватит места и для радости, и для светлой грусти.</p>
+            <p>Теперь я рядом. Каждый день. Могу обнять, когда захочешь. Но пусть это приложение останется местом, куда можно заглянуть в минуту тишины — и почувствовать, что ты не одна. Никогда.</p>
+            <p>Я люблю тебя, моя маленькая девочка. Ты справляешься так, что я горжусь каждым твоим днём.</p>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Фото -->
+    <div class="tab-content" id="photos">
+        <div class="gallery" id="galleryContainer"></div>
+    </div>
+
+    <!-- Фразы -->
+    <div class="tab-content" id="phrases">
+        <div class="phrase-card-random">
+            <div class="phrase-image">
+                <img id="randomPhraseImage" src="" alt="Фото">
+            </div>
+            <div class="phrase-text" id="randomPhraseText">
+                Здесь будет фраза
+            </div>
+            <button id="nextPhraseBtn" class="next-phrase-btn">💫 Другая фраза</button>
+        </div>
+    </div>
+
+    <!-- Письмо -->
+    <div class="tab-content" id="letter">
+        <div class="card letter">
+            <p>Моя родная,</p>
+            <p>Мне очень грустно, что я не могу быть всегда рядом с тобой физически, что не могу каждый день просыпаться рядом с тобой и засыпать. Но я обещал: это приложение будет держать тебя за руку в самые тёмные минуты. Теперь ты вернулась, и я могу обнимать тебя каждый день. Но я оставляю эти слова здесь — навсегда.</p>
+            <p>Твой брат — герой. А ты — его продолжение. Он смотрит на тебя и видит, как ты живёшь, как улыбаешься, как помнишь. И это самое лучшее, что ты можешь для него сделать.</p>
+            <p>Мы теперь вместе. Я могу обнять тебя, когда грустно, могу разделить с тобой тишину или смех. Но если вдруг ночью или днём тебе захочется услышать что-то тёплое — открой это приложение. Здесь всё ещё я. Здесь всё ещё моя любовь к тебе.</p>
+            <p>Нажимай «Другая фраза» — пусть поддержка приходит неожиданно, как мои мысли о тебе. Ты — моё всё.</p>
+            <p>Твой навсегда. Спасибо, что ты у меня есть. ❤️</p>
+        </div>
+    </div>
+
+    <!-- Игра -->
+    <div class="tab-content" id="game">
+        <div class="game-container">
+            <h2>Собери сердечки, роднуля моя ❤️</h2>
+            <p>Кликай на сердечко с короной 👑❤️</p>
+            <div class="game-field" id="gameField"></div>
+            <button id="resetGameBtn" class="next-phrase-btn">🔄 Начать заново</button>
+        </div>
+    </div>
+
+    <!-- Достижения -->
+    <div class="tab-content" id="achievements">
+        <div class="achievements-container" id="achievementsList">
+            <!-- Сюда будут динамически подгружаться достижения -->
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
