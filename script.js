@@ -210,35 +210,39 @@ const phrasesList = [
 // ---------- ГАЛЕРЕЯ ----------
 function loadGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
-    if (!galleryContainer) return;
-    for (let i = 1; i <= 58; i++) {
-        const img = document.createElement('img');
-        img.src = `image/f${i}.jpg`;
-        img.alt = `Фото ${i}`;
-        img.loading = 'lazy';
-        img.onerror = () => img.style.display = 'none';
-        galleryContainer.appendChild(img);
+    if (!galleryContainer) {
+        console.error('galleryContainer not found');
+        return;
     }
-}
-
-// ---------- СЛУЧАЙНОЕ ФОТО И ФРАЗА ----------
-function getRandomImage() {
-    const randomNum = Math.floor(Math.random() * 58) + 1;
-    return `image/f${randomNum}.jpg`;
-}
-function getRandomPhrase() {
-    return phrasesList[Math.floor(Math.random() * phrasesList.length)];
-}
-function updateRandomPhrase() {
-    const phraseText = document.getElementById('randomPhraseText');
-    const phraseImage = document.getElementById('randomPhraseImage');
-    if (phraseText) phraseText.textContent = getRandomPhrase();
-    if (phraseImage) {
-        phraseImage.src = getRandomImage();
-        phraseImage.onerror = () => {
-            phraseImage.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22200%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23fce4da%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22110%22%20font-family%3D%22system-ui%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23c45b3c%22%3E%D0%A4%D0%BE%D1%82%D0%BE%3C%2Ftext%3E%3C%2Fsvg%3E';
-        };
+    // Очищаем контейнер на всякий случай
+    galleryContainer.innerHTML = '';
+    
+    // Загружаем не все 58 сразу, а по 5 штук с задержкой
+    let index = 1;
+    const total = 58;
+    
+    function loadNextBatch() {
+        for (let i = 0; i < 5 && index <= total; i++, index++) {
+            try {
+                const img = document.createElement('img');
+                img.src = `image/f${index}.jpg`;
+                img.alt = `Фото ${index}`;
+                img.loading = 'lazy';
+                img.onerror = () => {
+                    console.warn(`Не загрузилось фото f${index}.jpg`);
+                    img.style.display = 'none';
+                };
+                galleryContainer.appendChild(img);
+            } catch(e) {
+                console.error('Ошибка при создании img:', e);
+            }
+        }
+        if (index <= total) {
+            setTimeout(loadNextBatch, 200);
+        }
     }
+    
+    loadNextBatch();
 }
 
 // ---------- УВЕДОМЛЕНИЯ ----------
