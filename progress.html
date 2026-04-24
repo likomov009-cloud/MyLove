@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогресс девушки</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: system-ui; background: #fce4da; text-align: center; padding: 2rem; }
+        .card { background: white; border-radius: 2rem; padding: 2rem; max-width: 350px; margin: auto; }
+        .value { font-size: 4rem; font-weight: bold; color: #c45b3c; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>❤️ Сердечек собрано ❤️</h2>
+    <div class="value" id="count">0</div>
+    <div id="time"></div>
+</div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyB_5VrJcwIJRMhWvpeBLGMSE_fPmrvAC0",
+        authDomain: "hearts-sync-525b1.firebaseapp.com",
+        projectId: "hearts-sync-525b1",
+        storageBucket: "hearts-sync-525b1.firebasestorage.app",
+        messagingSenderId: "326591877551",
+        appId: "1:326591877551:web:5e7ab8654fd83cd42bdf5a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const heartsRef = db.ref('hearts/devushka');
+    heartsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.getElementById('count').innerText = data.total;
+            document.getElementById('time').innerHTML = 'Обновлено: ' + new Date(data.timestamp).toLocaleString();
+        } else {
+            document.getElementById('count').innerText = '0';
+        }
+    });
+</script>
+</body>
+</html>

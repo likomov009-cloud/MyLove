@@ -207,6 +207,50 @@ const phrasesList = [
     "Родная, ты - моё вдохновение."
 ];
 
+// ---------- FIREBASE СИНХРОНИЗАЦИЯ СЕРДЕЧЕК ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyB_5VrJcwIJRMhWvpeBLGMSE_fPmrvAC0",
+  authDomain: "hearts-sync-525b1.firebaseapp.com",
+  projectId: "hearts-sync-525b1",
+  storageBucket: "hearts-sync-525b1.firebasestorage.app",
+  messagingSenderId: "326591877551",
+  appId: "1:326591877551:web:5e7ab8654fd83cd42bdf5a",
+  measurementId: "G-FNJDQFW15"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function syncTotalHearts() {
+  const userId = "devushka";
+  db.ref('hearts/' + userId).set({
+    total: totalHearts,
+    timestamp: Date.now()
+  });
+}
+
+// ---------- СЛУЧАЙНОЕ ФОТО И ФРАЗА ----------
+function getRandomImage() {
+    const randomNum = Math.floor(Math.random() * 58) + 1;
+    return `image/f${randomNum}.jpg`;
+}
+
+function getRandomPhrase() {
+    return phrasesList[Math.floor(Math.random() * phrasesList.length)];
+}
+
+function updateRandomPhrase() {
+    const phraseText = document.getElementById('randomPhraseText');
+    const phraseImage = document.getElementById('randomPhraseImage');
+    if (phraseText) phraseText.textContent = getRandomPhrase();
+    if (phraseImage) {
+        phraseImage.src = getRandomImage();
+        phraseImage.onerror = () => {
+            phraseImage.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22200%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23fce4da%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22110%22%20font-family%3D%22system-ui%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23c45b3c%22%3E%D0%A4%D0%BE%D1%82%D0%BE%3C%2Ftext%3E%3C%2Fsvg%3E';
+        };
+    }
+}
+
 // ---------- ГАЛЕРЕЯ ----------
 function loadGallery() {
     const galleryContainer = document.getElementById('galleryContainer');
@@ -407,6 +451,7 @@ function onHeartClick(heartElement) {
     heartElement.style.opacity = '0';
     currentScore++;
     totalHearts++;
+    syncTotalHearts();
     localStorage.setItem('totalHearts', totalHearts);
     updateScoreUI();
     checkGoal();
@@ -503,6 +548,7 @@ function initGame() {
     }
     const savedTotal = localStorage.getItem('totalHearts');
     totalHearts = savedTotal ? parseInt(savedTotal, 10) : 0;
+    syncTotalHearts();
     currentScore = 0;
     lastGoalReached = Math.floor(totalHearts / goal);
     initGameField();
