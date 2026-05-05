@@ -18,6 +18,10 @@
     <div class="value" id="count">0</div>
     <div id="time"></div>
 </div>
+<div class="card" style="margin-top: 20px;">
+    <h2>🏆 Рекорд в «Прыг-скок» 🏆</h2>
+    <div class="value" id="platformerRecord">0</div>
+</div>
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyB_5VrJcwIJRMhWvpeBLGMSE_fPmrvAC0",
@@ -39,6 +43,11 @@
             document.getElementById('count').innerText = '0';
         }
     });
+const platformerRef = db.ref('progress/platformerBest');
+platformerRef.on('value', (snapshot) => {
+    const val = snapshot.val();
+    document.getElementById('platformerRecord').innerText = val || 0;
+});
 </script>
 </body>
 </html>

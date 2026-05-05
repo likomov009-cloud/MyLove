@@ -30,6 +30,7 @@
         <button class="tab-btn" data-tab="phrases">Фразы</button>
         <button class="tab-btn" data-tab="letter">Письмо</button>
         <button class="tab-btn" data-tab="game">Игра</button>
+        <button class="tab-btn" data-tab="platformer">Прыг-скок</button>
         <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
     </nav>
 
@@ -83,7 +84,26 @@
         </div>
     </div>
 
-    <!-- Достижения -->
+<!-- Платформер -->
+<div class="tab-content" id="platformer">
+    <div class="platformer-container">
+        <canvas id="platformerCanvas"></canvas>
+        <div id="platformerScoreDisplay">
+            Счёт: <span id="platformerScore">0</span>
+            &nbsp; | &nbsp;
+            Рекорд: <span id="platformerHighscore">0</span>
+        </div>
+        <div id="mobileControls">
+            <button class="ctrl-btn" id="btnLeft">←</button>
+            <button class="ctrl-btn" id="btnJump">↑</button>
+            <button class="ctrl-btn" id="btnRight">→</button>
+        </div>
+        <p class="platformer-hint">Стрелки / A,D — бежать, пробел / W / ↑ — прыжок</p>
+    </div>
+</div>    
+
+
+<!-- Достижения -->
     <div class="tab-content" id="achievements">
         <div class="achievements-container" id="achievementsList">
             <!-- Сюда будут динамически подгружаться достижения -->
@@ -91,9 +111,6 @@
     </div>
 </div>
 
-<!-- Firebase SDK (совместимая версия для обычных скриптов) -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

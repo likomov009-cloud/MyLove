@@ -730,6 +730,527 @@ function renderAchievements() {
 }
 
 // ---------- ЗАПУСК ----------
+
+// ---------- ПЛАТФОРМЕР (УЛУЧШЕННЫЙ) ----------
+class PlatformFallGame {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.scoreDisplay = document.getElementById('platformerScore');
+        this.highscoreDisplay = document.getElementById('platformerHighscore');
+        
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        
+        this.player = {
+            x: 0, y: 0,
+            vx: 0, vy: 0,
+            radius: 14,
+            onGround: false,
+            prevOnGround: false   // для отслеживания приземления
+        };
+        this.platforms = [];
+        this.particles = [];       // частицы при приземлении
+        this.score = 0;
+        this.gameOver = false;
+        this.speed = 0.3;          // очень плавный старт
+        this.maxSpeed = 4;
+        this.acceleration = 0.0002;
+        
+        // Управление (инерция)
+        this.keys = { left: false, right: false, jump: false };
+        this.active = false;
+        this.frameId = null;
+        
+        // Звёзды и облака (генерируем один раз)
+        this.stars = [];
+        this.clouds = [];
+        this.generateBackground();
+        
+        // Рекорд
+        this.bestScore = parseInt(localStorage.getItem('platformerBest')) || 0;
+        this.highscoreDisplay.textContent = this.bestScore;
+        
+        // Слушатели клавиатуры
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleKeyUp = this.handleKeyUp.bind(this);
+        window.addEventListener('keydown', this.handleKeyDown);
+        window.addEventListener('keyup', this.handleKeyUp);
+        
+        // Мобильные кнопки
+        this.addMobileListeners();
+        
+        // Клик для рестарта после game over
+        this.canvas.addEventListener('click', (e) => {
+            if (this.gameOver) {
+                this.reset();
+                this.start();
+            }
+        });
+    }
+    
+    resize() {
+        const maxWidth = Math.min(400, window.innerWidth - 32);
+        this.canvas.width = Math.floor(maxWidth);
+        this.canvas.height = Math.floor(maxWidth * 1.5);
+        if (this.active && !this.gameOver) {
+            this.player.x = Math.min(this.player.x, this.canvas.width - this.player.radius);
+            this.player.y = Math.min(this.player.y, this.canvas.height - this.player.radius);
+        }
+    }
+    
+    // Генерация статичного фона (звёзды, облака)
+    generateBackground() {
+        // Звёзды (маленькие белые точки наверху)
+        this.stars = [];
+        for (let i = 0; i < 40; i++) {
+            this.stars.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height * 0.5,
+                radius: Math.random() * 1.8 + 0.5,
+                brightness: Math.random() * 0.5 + 0.5
+            });
+        }
+        // Облака (несколько штук)
+        this.clouds = [];
+        for (let i = 0; i < 4; i++) {
+            this.clouds.push({
+                x: Math.random() * this.canvas.width,
+                y: 30 + Math.random() * (this.canvas.height * 0.3),
+                width: 50 + Math.random() * 80,
+                speed: 0.2 + Math.random() * 0.4
+            });
+        }
+    }
+    
+    handleKeyDown(e) {
+        if (!this.active) return;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); this.keys.left = true; }
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); this.keys.right = true; }
+        if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
+            e.preventDefault();
+            this.keys.jump = true;
+        }
+    }
+    
+    handleKeyUp(e) {
+        if (!this.active) return;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+        if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') this.keys.jump = false;
+    }
+    
+    addMobileListeners() {
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+        const btnJump = document.getElementById('btnJump');
+        
+        const leftDown = (e) => { e.preventDefault(); if (this.active) this.keys.left = true; };
+        const leftUp = () => { this.keys.left = false; };
+        const rightDown = (e) => { e.preventDefault(); if (this.active) this.keys.right = true; };
+        const rightUp = () => { this.keys.right = false; };
+        const jumpDown = (e) => { e.preventDefault(); if (this.active) this.keys.jump = true; };
+        const jumpUp = () => { this.keys.jump = false; };
+        
+        if (btnLeft) {
+            btnLeft.addEventListener('pointerdown', leftDown);
+            btnLeft.addEventListener('pointerup', leftUp);
+            btnLeft.addEventListener('pointerleave', leftUp);
+        }
+        if (btnRight) {
+            btnRight.addEventListener('pointerdown', rightDown);
+            btnRight.addEventListener('pointerup', rightUp);
+            btnRight.addEventListener('pointerleave', rightUp);
+        }
+        if (btnJump) {
+            btnJump.addEventListener('pointerdown', jumpDown);
+            btnJump.addEventListener('pointerup', jumpUp);
+            btnJump.addEventListener('pointerleave', jumpUp);
+        }
+        this.canvas.addEventListener('touchstart', e => e.preventDefault());
+    }
+    
+    start() {
+        if (this.active) return;
+        this.active = true;
+        if (this.gameOver) {
+            this.reset();
+        } else if (!this.frameId) {
+            if (this.platforms.length === 0) this.generateStartPlatforms();
+            this.lastTime = performance.now();
+            this.loop(this.lastTime);
+        }
+    }
+    
+    stop() {
+        this.active = false;
+        if (this.frameId) {
+            cancelAnimationFrame(this.frameId);
+            this.frameId = null;
+        }
+        this.keys.left = false;
+        this.keys.right = false;
+        this.keys.jump = false;
+    }
+    
+    reset() {
+        this.gameOver = false;
+        this.score = 0;
+        this.speed = 0.8;
+        this.platforms = [];
+        this.particles = [];
+        this.player.x = this.canvas.width / 2;
+        this.player.y = this.canvas.height - 45;
+        this.player.vx = 0;
+        this.player.vy = 0;
+        this.player.prevOnGround = false;
+        this.generateStartPlatforms();
+        this.lastTime = performance.now();
+        this.loop(this.lastTime);
+    }
+    
+    generateStartPlatforms() {
+        // Платформа под ногами
+        this.platforms.push({
+            x: this.player.x - 35,
+            y: this.player.y + this.player.radius + 4,
+            w: 70, h: 14
+        });
+        // Ещё 10 платформ выше, с гарантированным небольшим промежутком
+        let lastY = this.player.y;
+        for (let i = 0; i < 10; i++) {
+            const y = lastY - 60 - Math.random() * 20;  // дистанция 60-80
+            const x = Math.random() * (this.canvas.width - 70);
+            this.platforms.push({ x, y, w: 70, h: 14 });
+            lastY = y;
+        }
+    }
+    
+    spawnLandingParticles(x, y) {
+        for (let i = 0; i < 6; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1 + Math.random() * 3;
+            this.particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 1,
+                life: 0.4 + Math.random() * 0.4,
+                maxLife: 0.6,
+                size: 3 + Math.random() * 4
+            });
+        }
+    }
+    
+    loop(timestamp) {
+        if (!this.active || this.gameOver) {
+            if (this.gameOver) this.drawGameOver();
+            return;
+        }
+        const delta = Math.min(timestamp - this.lastTime, 50); // ограничим для безопасности
+        this.lastTime = timestamp;
+        
+        this.update(delta);
+        this.draw();
+        
+        this.frameId = requestAnimationFrame((t) => this.loop(t));
+    }
+    
+    update(delta) {
+        // Увеличиваем скорость со временем
+        if (this.speed < this.maxSpeed) {
+            this.speed += this.acceleration * delta;
+        }
+        
+        // Плавное горизонтальное движение (инерция)
+        const targetDir = (this.keys.left ? -1 : 0) + (this.keys.right ? 1 : 0);
+        const accel = 0.015;   // ускорение за мс
+        const friction = 0.008; // трение за мс
+        const maxVx = 5.5;
+        
+        if (targetDir !== 0) {
+            this.player.vx += targetDir * accel * delta;
+            if (Math.abs(this.player.vx) > maxVx) {
+                this.player.vx = Math.sign(this.player.vx) * maxVx;
+            }
+        } else {
+            // Затухание
+            this.player.vx *= Math.exp(-friction * delta);
+        }
+        
+        // Прыжок
+        if (this.keys.jump && this.player.onGround) {
+            this.player.vy = -7.5;
+            this.player.onGround = false;
+            this.keys.jump = false;
+        }
+        
+        // Гравитация (фиксированный шаг, как в оригинале, чтобы не зависеть от delta)
+        this.player.vy += 0.4;
+        
+        // Движение
+        this.player.x += this.player.vx;
+        this.player.y += this.player.vy;
+        
+        // Зацикливание по горизонтали
+        if (this.player.x - this.player.radius > this.canvas.width) this.player.x = -this.player.radius;
+        if (this.player.x + this.player.radius < 0) this.player.x = this.canvas.width + this.player.radius;
+        
+        // Обновление платформ: падают вниз
+        for (let p of this.platforms) {
+            p.y += this.speed;
+        }
+        // Удаляем уехавшие
+        this.platforms = this.platforms.filter(p => p.y < this.canvas.height + 40);
+        // Генерируем новые сверху (больше, чтобы плотнее)
+        while (this.platforms.length < 12) {
+            const lastPlatform = this.platforms.length > 0 ? this.platforms[this.platforms.length-1] : null;
+            let newY;
+            if (lastPlatform && lastPlatform.y < 0) {
+                newY = lastPlatform.y - 45 - Math.random() * 25; // ближе к предыдущей
+            } else {
+                newY = -30 - Math.random() * 50;
+            }
+            this.platforms.push({
+                x: Math.random() * (this.canvas.width - 70),
+                y: newY,
+                w: 70,
+                h: 14
+            });
+        }
+        
+        // Проверка столкновений с платформами
+        this.player.prevOnGround = this.player.onGround;
+        this.player.onGround = false;
+        for (let p of this.platforms) {
+            if (this.player.vy >= 0 &&
+                this.player.y + this.player.radius > p.y &&
+                this.player.y - this.player.radius < p.y + p.h &&
+                this.player.x + this.player.radius > p.x &&
+                this.player.x - this.player.radius < p.x + p.w) {
+                // Приземление
+                this.player.y = p.y - this.player.radius;
+                this.player.vy = 0;
+                this.player.onGround = true;
+            }
+        }
+        
+        // Эффект приземления (если только что приземлился)
+        if (this.player.onGround && !this.player.prevOnGround) {
+            this.spawnLandingParticles(this.player.x, this.player.y + this.player.radius);
+            // Звук приземления (тихий)
+            if (typeof playBeep === 'function') playBeep(220, 0.08, 'sine');
+        }
+        
+        // Game Over при падении за экран
+        if (this.player.y - this.player.radius > this.canvas.height) {
+            this.gameOver = true;
+            this.saveBestScore();
+        }
+        
+        // Очки
+        this.score += this.speed * delta * 0.015;
+        this.scoreDisplay.textContent = Math.floor(this.score);
+        
+        // Обновление частиц
+        for (let p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05;
+            p.life -= delta * 0.001;
+        }
+        this.particles = this.particles.filter(p => p.life > 0);
+        
+        // Движение облаков
+        for (let c of this.clouds) {
+            c.x -= c.speed;
+            if (c.x + c.width < 0) c.x = this.canvas.width + 20;
+        }
+    }
+    
+    draw() {
+        const ctx = this.ctx;
+        const W = this.canvas.width;
+        const H = this.canvas.height;
+        
+        // Закатное небо (градиент)
+        const gradient = ctx.createLinearGradient(0, 0, 0, H);
+        gradient.addColorStop(0, '#1a1a3e');
+        gradient.addColorStop(0.5, '#4a2c5e');
+        gradient.addColorStop(0.8, '#b85c6e');
+        gradient.addColorStop(1, '#ffb7b2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, W, H);
+        
+        // Звёзды
+        for (let s of this.stars) {
+            ctx.globalAlpha = s.brightness;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        
+        // Облака (полупрозрачные)
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        for (let c of this.clouds) {
+            ctx.beginPath();
+            const cy = c.y;
+            const cx = c.x;
+            ctx.ellipse(cx, cy, c.width*0.5, 20, 0, 0, Math.PI*2);
+            ctx.ellipse(cx + c.width*0.25, cy - 12, c.width*0.4, 18, 0, 0, Math.PI*2);
+            ctx.ellipse(cx - c.width*0.2, cy - 8, c.width*0.35, 16, 0, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        // Платформы
+        for (let p of this.platforms) {
+            this.drawPlatform(p);
+        }
+        
+        // Частицы
+        for (let p of this.particles) {
+            const alpha = p.life / p.maxLife;
+            ctx.fillStyle = `rgba(255, 220, 180, ${alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        // Игрок
+        this.drawPlayer();
+        
+        // Счёт (красивая надпись)
+        ctx.font = 'bold 18px system-ui';
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 6;
+        ctx.textAlign = 'right';
+        ctx.fillText('❤️ ' + Math.floor(this.score), W - 15, 35);
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+    }
+    
+    drawPlatform(p) {
+        const ctx = this.ctx;
+        const x = p.x, y = p.y, w = p.w, h = p.h;
+        const radius = 6;
+        // Тень
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.moveTo(x + radius + 2, y + h + 2);
+        ctx.lineTo(x + w - radius + 2, y + h + 2);
+        ctx.quadraticCurveTo(x + w + 2, y + h + 2, x + w + 2, y + h - radius + 2);
+        ctx.lineTo(x + w + 2, y + radius + 2);
+        ctx.quadraticCurveTo(x + w + 2, y + 2, x + w - radius + 2, y + 2);
+        ctx.lineTo(x + radius + 2, y + 2);
+        ctx.quadraticCurveTo(x + 2, y + 2, x + 2, y + radius + 2);
+        ctx.lineTo(x + 2, y + h - radius + 2);
+        ctx.quadraticCurveTo(x + 2, y + h + 2, x + radius + 2, y + h + 2);
+        ctx.fill();
+        
+        // Доска (градиент)
+        const grad = ctx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, '#c49a6c');
+        grad.addColorStop(0.5, '#a67c52');
+        grad.addColorStop(1, '#7b5e3b');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.fill();
+        
+        // Полосы дерева (декор)
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= 4; i++) {
+            const ly = y + i * (h / 5);
+            ctx.beginPath();
+            ctx.moveTo(x + 4, ly);
+            ctx.lineTo(x + w - 4, ly);
+            ctx.stroke();
+        }
+    }
+    
+    drawPlayer() {
+        const ctx = this.ctx;
+        const { x, y, radius: r } = this.player;
+        // Тень под сердечком
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.ellipse(x, y + r + 2, r * 0.8, r * 0.3, 0, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Сердечко с градиентом
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(r/16, r/16);
+        const grad = ctx.createRadialGradient(-4, -4, 2, 0, 0, 18);
+        grad.addColorStop(0, '#ff7b9c');
+        grad.addColorStop(0.7, '#e63e62');
+        grad.addColorStop(1, '#b81b3a');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(0, 4);
+        ctx.bezierCurveTo(-8, -8, -16, 4, 0, 16);
+        ctx.bezierCurveTo(16, 4, 8, -8, 0, 4);
+        ctx.fill();
+        
+        // Блик
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath();
+        ctx.ellipse(-4, -4, 3, 1.8, -0.5, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+    
+    drawGameOver() {
+        const ctx = this.ctx;
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#1e1024';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('💔 Попробуй ещё раз', this.canvas.width/2, this.canvas.height/2 - 5);
+        ctx.font = '16px system-ui';
+        ctx.fillText('(кликни по экрану)', this.canvas.width/2, this.canvas.height/2 + 35);
+    }
+    
+    saveBestScore() {
+        const finalScore = Math.floor(this.score);
+        if (finalScore > this.bestScore) {
+            this.bestScore = finalScore;
+            localStorage.setItem('platformerBest', finalScore);
+            this.highscoreDisplay.textContent = finalScore;
+        }
+    }
+}
+
+let platformerGame = null;
+
+function initPlatformer() {
+    if (!platformerGame) {
+        platformerGame = new PlatformFallGame('platformerCanvas');
+    }
+    platformerGame.start();
+}
+
+function stopPlatformer() {
+    if (platformerGame) {
+        platformerGame.stop();
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Splash
     setTimeout(() => {
@@ -737,27 +1258,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => splash.remove(), 500);
+
         }
     }, 1500);
+// Если страница загрузилась не на платформере, убедимся, что игра не крутится
+if (!document.getElementById('platformer')?.classList.contains('active')) {
+    stopPlatformer();
+}
 
     // Вкладки
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
     tabs.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.getAttribute('data-tab');
-            tabs.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            contents.forEach(content => content.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (tabId === 'phrases') updateRandomPhrase();
-            if (tabId === 'game') {
-                if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
-                else updateScoreUI();
-            }
-            if (tabId === 'achievements') renderAchievements();
-        });
+    btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        tabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        contents.forEach(content => content.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+
+        // Останавливаем предыдущий платформер, если был
+        if (tabId !== 'platformer') stopPlatformer();
+
+        if (tabId === 'phrases') updateRandomPhrase();
+        if (tabId === 'game') {
+            if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
+            else updateScoreUI();
+        }
+        if (tabId === 'achievements') renderAchievements();
+        if (tabId === 'platformer') initPlatformer();
     });
+});
 
     loadGallery();
     updateRandomPhrase();
