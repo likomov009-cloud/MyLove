@@ -207,31 +207,42 @@ const phrasesList = [
     "Родная, ты - моё вдохновение."
 ];
 
-// ---------- FIREBASE СИНХРОНИЗАЦИЯ СЕРДЕЧЕК ----------
-const firebaseConfig = {
-  apiKey: "AIzaSyB_5VrJcwIJRMhWvpeBLGMSE_fPmrvAC0",
-  authDomain: "hearts-sync-525b1.firebaseapp.com",
-  projectId: "hearts-sync-525b1",
-  storageBucket: "hearts-sync-525b1.firebasestorage.app",
-  messagingSenderId: "326591877551",
-  appId: "1:326591877551:web:5e7ab8654fd83cd42bdf5a",
-  measurementId: "G-FNJDQFW15"
-};
+// ---------- ФРАЗЫ ДЛЯ ФОТО С БРАТОМ (f73 - f79) ----------
+const brotherPhrases = [
+    "Твой брат - герой. Он всегда с тобой, в каждом твоём шаге.",
+    "Он смотрит на тебя с небес и гордится. Ты - его свет.",
+    "Память о нём - в твоей улыбке. Живи так, чтобы он видел твоё счастье.",
+    "Он не ушёл, он стал твоим ангелом-хранителем.",
+    "Каждый раз, когда ты вспоминаешь его, он становится ближе.",
+    "Его любовь к тебе была бесконечной. Она живёт в твоём сердце.",
+    "Ты - его маленькая сестра, его гордость. Он всегда будет рядом.",
+    "Он отдал жизнь за других. Твоя задача - жить достойно и помнить.",
+    "Никто не заменит его, но его дух с тобой каждый день.",
+    "Светлая память герою. Ты - его продолжение, его надежда.",
+    "Когда тебе тяжело, вспомни его улыбку. Она придаст сил.",
+    "Он верил в тебя. Не подведи его - будь счастлива.",
+    "Твой брат - часть каждого твоего успеха. Он радуется за тебя.",
+    "Помни: он не хотел бы, чтобы ты страдала. Живи ярко.",
+    "Его жертва - не напрасна. Ты - доказательство его любви к жизни."
+];
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-function syncTotalHearts() {
-  const userId = "devushka";
-  db.ref('hearts/' + userId).set({
-    total: totalHearts,
-    timestamp: Date.now()
-  });
+// ---------- ГАЛЕРЕЯ ----------
+function loadGallery() {
+    const galleryContainer = document.getElementById('galleryContainer');
+    if (!galleryContainer) return;
+    for (let i = 1; i <= 79; i++) {
+        const img = document.createElement('img');
+        img.src = `image/f${i}.jpg`;
+        img.alt = `Фото ${i}`;
+        img.loading = 'lazy';
+        img.onerror = () => img.style.display = 'none';
+        galleryContainer.appendChild(img);
+    }
 }
 
 // ---------- СЛУЧАЙНОЕ ФОТО И ФРАЗА ----------
 function getRandomImage() {
-    const randomNum = Math.floor(Math.random() * 58) + 1;
+    const randomNum = Math.floor(Math.random() * 79) + 1;
     return `image/f${randomNum}.jpg`;
 }
 
@@ -242,52 +253,25 @@ function getRandomPhrase() {
 function updateRandomPhrase() {
     const phraseText = document.getElementById('randomPhraseText');
     const phraseImage = document.getElementById('randomPhraseImage');
-    if (phraseText) phraseText.textContent = getRandomPhrase();
-    if (phraseImage) {
-        phraseImage.src = getRandomImage();
-        phraseImage.onerror = () => {
-            phraseImage.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22200%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23fce4da%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22110%22%20font-family%3D%22system-ui%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23c45b3c%22%3E%D0%A4%D0%BE%D1%82%D0%BE%3C%2Ftext%3E%3C%2Fsvg%3E';
-        };
+    if (!phraseText || !phraseImage) return;
+
+    const randomNum = Math.floor(Math.random() * 79) + 1; // ← исправлено с 75 на 79
+    const imagePath = `image/f${randomNum}.jpg`;
+    phraseImage.src = imagePath;
+    phraseImage.onerror = () => {
+        phraseImage.src = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22300%22%20height%3D%22200%22%20viewBox%3D%220%200%20300%20200%22%3E%3Crect%20width%3D%22300%22%20height%3D%22200%22%20fill%3D%22%23fce4da%22%2F%3E%3Ctext%20x%3D%22150%22%20y%3D%22110%22%20font-family%3D%22system-ui%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23c45b3c%22%3E%D0%A4%D0%BE%D1%82%D0%BE%3C%2Ftext%3E%3C%2Fsvg%3E';
+    };
+
+    let phrase;
+    if (randomNum >= 73 && randomNum <= 79) {
+        const randomIndex = Math.floor(Math.random() * brotherPhrases.length);
+        phrase = brotherPhrases[randomIndex];
+    } else {
+        phrase = getRandomPhrase();
     }
+    phraseText.textContent = phrase;
 }
 
-// ---------- ГАЛЕРЕЯ ----------
-function loadGallery() {
-    const galleryContainer = document.getElementById('galleryContainer');
-    if (!galleryContainer) {
-        console.error('galleryContainer not found');
-        return;
-    }
-    // Очищаем контейнер на всякий случай
-    galleryContainer.innerHTML = '';
-    
-    // Загружаем не все 58 сразу, а по 5 штук с задержкой
-    let index = 1;
-    const total = 58;
-    
-    function loadNextBatch() {
-        for (let i = 0; i < 5 && index <= total; i++, index++) {
-            try {
-                const img = document.createElement('img');
-                img.src = `image/f${index}.jpg`;
-                img.alt = `Фото ${index}`;
-                img.loading = 'lazy';
-                img.onerror = () => {
-                    console.warn(`Не загрузилось фото f${index}.jpg`);
-                    img.style.display = 'none';
-                };
-                galleryContainer.appendChild(img);
-            } catch(e) {
-                console.error('Ошибка при создании img:', e);
-            }
-        }
-        if (index <= total) {
-            setTimeout(loadNextBatch, 200);
-        }
-    }
-    
-    loadNextBatch();
-}
 
 // ---------- УВЕДОМЛЕНИЯ ----------
 let notificationTimers = [];
@@ -451,7 +435,6 @@ function onHeartClick(heartElement) {
     heartElement.style.opacity = '0';
     currentScore++;
     totalHearts++;
-    syncTotalHearts();
     localStorage.setItem('totalHearts', totalHearts);
     updateScoreUI();
     checkGoal();
@@ -548,7 +531,6 @@ function initGame() {
     }
     const savedTotal = localStorage.getItem('totalHearts');
     totalHearts = savedTotal ? parseInt(savedTotal, 10) : 0;
-    syncTotalHearts();
     currentScore = 0;
     lastGoalReached = Math.floor(totalHearts / goal);
     initGameField();
@@ -561,9 +543,10 @@ function initGame() {
 const trackList = [
     'audio/background1.mp3',
     'audio/background2.mp3',
-    'audio/background3.mp3'
+    'audio/background3.mp3',
+    'audio/background4.mp3',
 ];
-let currentTrackIndex = 0;      // 0,1,2
+let currentTrackIndex = 0;      // 0,1,2,3
 let bgMusic = null;
 let isMusicPlaying = false;
 
