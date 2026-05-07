@@ -207,6 +207,34 @@ const phrasesList = [
     "Родная, ты - моё вдохновение."
 ];
 
+// ---------- FIREBASE СИНХРОНИЗАЦИЯ СЕРДЕЧЕК И РЕКОРДА ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyB_5VrJcwIJRMhWvpeBLGMSE_fPmrvAC0",
+  authDomain: "hearts-sync-525b1.firebaseapp.com",
+  projectId: "hearts-sync-525b1",
+  storageBucket: "hearts-sync-525b1.firebasestorage.app",
+  messagingSenderId: "326591877551",
+  appId: "1:326591877551:web:5e7ab8654fd83cd42bdf5a",
+  measurementId: "G-FNJDQFW15"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Синхронизация сердечек
+function syncTotalHearts() {
+  const userId = "devushka";
+  db.ref('hearts/' + userId).set({
+    total: totalHearts,
+    timestamp: Date.now()
+  });
+}
+
+// Синхронизация рекорда платформера
+function syncPlatformerBest(score) {
+  db.ref('progress/platformerBest').set(score);
+}
+
 // ---------- ФРАЗЫ ДЛЯ ФОТО С БРАТОМ (f73 - f79) ----------
 const brotherPhrases = [
     "Твой брат - герой. Он всегда с тобой, в каждом твоём шаге.",
@@ -435,6 +463,7 @@ function onHeartClick(heartElement) {
     heartElement.style.opacity = '0';
     currentScore++;
     totalHearts++;
+    syncTotalHearts();
     localStorage.setItem('totalHearts', totalHearts);
     updateScoreUI();
     checkGoal();
@@ -531,6 +560,7 @@ function initGame() {
     }
     const savedTotal = localStorage.getItem('totalHearts');
     totalHearts = savedTotal ? parseInt(savedTotal, 10) : 0;
+    syncTotalHearts();
     currentScore = 0;
     lastGoalReached = Math.floor(totalHearts / goal);
     initGameField();
@@ -1232,9 +1262,9 @@ class PlatformFallGame {
             this.bestScore = finalScore;
             localStorage.setItem('platformerBest', finalScore);
             this.highscoreDisplay.textContent = finalScore;
+            yncPlatformerBest(finalScore);
         }
     }
-}
 
 let platformerGame = null;
 
