@@ -1262,9 +1262,10 @@ class PlatformFallGame {
             this.bestScore = finalScore;
             localStorage.setItem('platformerBest', finalScore);
             this.highscoreDisplay.textContent = finalScore;
-            yncPlatformerBest(finalScore);
+            syncPlatformerBest(finalScore);
         }
     }
+}
 
 let platformerGame = null;
 
