@@ -713,7 +713,10 @@ const achievements = [
     { id: 3, name: 'Тепло души', desc: 'Собрать 250 сердечек', target: 250, icon: '🔥', unlocked: false },
     { id: 4, name: 'Мастер любви', desc: 'Собрать 500 сердечек', target: 500, icon: '💖', unlocked: false },
     { id: 5, name: 'Ангел-хранитель', desc: 'Собрать 1000 сердечек', target: 1000, icon: '👼', unlocked: false },
-    { id: 6, name: 'Легенда', desc: 'Собрать 2500 сердечек', target: 2500, icon: '🏆', unlocked: false }
+    { id: 6, name: 'Легенда', desc: 'Собрать 2500 сердечек', target: 2500, icon: '🏆', unlocked: false },
+    { id: 7, name: 'Королева', desc: 'Собрать 5000 сердечек', target: 5000, icon: '👸', unlocked: false },
+    { id  8, name: 'Императрица' desc: 'Собрать 10000 сердечек', target: 10000, icon: '👑 ', unlocked: false },
+    { id  9, name: 'Маленькая, любимая жена' desc: 'Собрать 50000 сердечек', target: 50000, icon: '👰‍♀️ ', unlocked: false }
 ];
 function loadAchievements() {
     const saved = localStorage.getItem('achievements');
@@ -762,6 +765,7 @@ function renderAchievements() {
 // ---------- ЗАПУСК ----------
 
 // ---------- ПЛАТФОРМЕР (УЛУЧШЕННЫЙ) ----------
+// ---------- ПЛАТФОРМЕР (УЛУЧШЕННЫЙ v2) ----------
 class PlatformFallGame {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
@@ -777,40 +781,38 @@ class PlatformFallGame {
             vx: 0, vy: 0,
             radius: 14,
             onGround: false,
-            prevOnGround: false   // для отслеживания приземления
+            prevOnGround: false
         };
         this.platforms = [];
-        this.particles = [];       // частицы при приземлении
+        this.particles = [];
+        this.trailParticles = [];   // шлейф за сердечком
         this.score = 0;
         this.gameOver = false;
-        this.speed = 0.3;          // очень плавный старт
-        this.maxSpeed = 4;
-        this.acceleration = 0.0002;
+        this.speed = 0.1;          // начальная скорость (маленькая)
+        this.maxSpeed = 1;
+        this.acceleration = 0.0001;
+        this.started = false;      // задержка перед стартом движения
+        this.startDelay = 2500;    // 1.5 секунды без движения
+        this.startTimestamp = 0;
         
-        // Управление (инерция)
         this.keys = { left: false, right: false, jump: false };
         this.active = false;
         this.frameId = null;
         
-        // Звёзды и облака (генерируем один раз)
+        // Звёзды и облака
         this.stars = [];
         this.clouds = [];
         this.generateBackground();
         
-        // Рекорд
         this.bestScore = parseInt(localStorage.getItem('platformerBest')) || 0;
         this.highscoreDisplay.textContent = this.bestScore;
         
-        // Слушатели клавиатуры
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
         window.addEventListener('keydown', this.handleKeyDown);
         window.addEventListener('keyup', this.handleKeyUp);
-        
-        // Мобильные кнопки
         this.addMobileListeners();
         
-        // Клик для рестарта после game over
         this.canvas.addEventListener('click', (e) => {
             if (this.gameOver) {
                 this.reset();
@@ -829,37 +831,41 @@ class PlatformFallGame {
         }
     }
     
-    // Генерация статичного фона (звёзды, облака)
     generateBackground() {
-        // Звёзды (маленькие белые точки наверху)
         this.stars = [];
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < 50; i++) {
             this.stars.push({
                 x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height * 0.5,
-                radius: Math.random() * 1.8 + 0.5,
-                brightness: Math.random() * 0.5 + 0.5
+                y: Math.random() * this.canvas.height * 0.6,
+                radius: Math.random() * 2 + 0.5,
+                brightness: Math.random() * 0.5 + 0.5,
+                twinkleSpeed: Math.random() * 0.02 + 0.01
             });
         }
-        // Облака (несколько штук)
         this.clouds = [];
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 5; i++) {
             this.clouds.push({
                 x: Math.random() * this.canvas.width,
-                y: 30 + Math.random() * (this.canvas.height * 0.3),
-                width: 50 + Math.random() * 80,
-                speed: 0.2 + Math.random() * 0.4
+                y: 30 + Math.random() * (this.canvas.height * 0.35),
+                width: 60 + Math.random() * 100,
+                height: 25 + Math.random() * 20,
+                speed: 0.15 + Math.random() * 0.5,
+                opacity: 0.2 + Math.random() * 0.3
             });
         }
     }
     
     handleKeyDown(e) {
-        if (!this.active) return;
+        if (!this.active || this.gameOver) return;
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); this.keys.left = true; }
         if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); this.keys.right = true; }
         if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') {
             e.preventDefault();
             this.keys.jump = true;
+            if (!this.started) {
+                this.started = true;   // после первого нажатия начинается движение
+                this.startTimestamp = performance.now();
+            }
         }
     }
     
@@ -875,11 +881,20 @@ class PlatformFallGame {
         const btnRight = document.getElementById('btnRight');
         const btnJump = document.getElementById('btnJump');
         
-        const leftDown = (e) => { e.preventDefault(); if (this.active) this.keys.left = true; };
+        const leftDown = (e) => { e.preventDefault(); if (this.active && !this.gameOver) this.keys.left = true; };
         const leftUp = () => { this.keys.left = false; };
-        const rightDown = (e) => { e.preventDefault(); if (this.active) this.keys.right = true; };
+        const rightDown = (e) => { e.preventDefault(); if (this.active && !this.gameOver) this.keys.right = true; };
         const rightUp = () => { this.keys.right = false; };
-        const jumpDown = (e) => { e.preventDefault(); if (this.active) this.keys.jump = true; };
+        const jumpDown = (e) => {
+            e.preventDefault();
+            if (this.active && !this.gameOver) {
+                this.keys.jump = true;
+                if (!this.started) {
+                    this.started = true;
+                    this.startTimestamp = performance.now();
+                }
+            }
+        };
         const jumpUp = () => { this.keys.jump = false; };
         
         if (btnLeft) {
@@ -926,11 +941,13 @@ class PlatformFallGame {
     reset() {
         this.gameOver = false;
         this.score = 0;
-        this.speed = 0.8;
+        this.speed = 0.5;
         this.platforms = [];
         this.particles = [];
+        this.trailParticles = [];
+        this.started = false;
         this.player.x = this.canvas.width / 2;
-        this.player.y = this.canvas.height - 45;
+        this.player.y = this.canvas.height / 2;   // стартуем в центре экрана
         this.player.vx = 0;
         this.player.vy = 0;
         this.player.prevOnGround = false;
@@ -940,35 +957,61 @@ class PlatformFallGame {
     }
     
     generateStartPlatforms() {
-        // Платформа под ногами
+        // Платформа прямо под игроком
         this.platforms.push({
-            x: this.player.x - 35,
+            x: this.player.x - 45,   // платформа шириной 90
             y: this.player.y + this.player.radius + 4,
-            w: 70, h: 14
+            w: 90,
+            h: 14
         });
-        // Ещё 10 платформ выше, с гарантированным небольшим промежутком
-        let lastY = this.player.y;
-        for (let i = 0; i < 10; i++) {
-            const y = lastY - 60 - Math.random() * 20;  // дистанция 60-80
-            const x = Math.random() * (this.canvas.width - 70);
-            this.platforms.push({ x, y, w: 70, h: 14 });
+        // Генерируем ещё 14 платформ вверх и вниз для запаса
+        let lastY = this.player.y + this.player.radius + 4;
+        for (let i = 0; i < 7; i++) {
+            const y = lastY - 55 - Math.random() * 25;  // дистанция 55-80 (стало меньше)
+            const x = Math.random() * (this.canvas.width - 90);
+            this.platforms.push({ x, y, w: 90, h: 14 });
+            lastY = y;
+        }
+        // Несколько платформ ниже игрока (чтобы при падении вниз тоже были)
+        lastY = this.player.y + this.player.radius + 4;
+        for (let i = 0; i < 4; i++) {
+            const y = lastY + 60 + Math.random() * 30;
+            const x = Math.random() * (this.canvas.width - 90);
+            this.platforms.push({ x, y, w: 90, h: 14 });
             lastY = y;
         }
     }
     
     spawnLandingParticles(x, y) {
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 8; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 1 + Math.random() * 3;
+            const speed = 1.5 + Math.random() * 4;
             this.particles.push({
                 x, y,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed - 1,
-                life: 0.4 + Math.random() * 0.4,
-                maxLife: 0.6,
-                size: 3 + Math.random() * 4
+                vy: Math.sin(angle) * speed - 2,
+                life: 0.5 + Math.random() * 0.5,
+                maxLife: 0.7,
+                size: 4 + Math.random() * 5,
+                color: `hsl(${30 + Math.random() * 30}, 80%, 70%)` // тёплые искры
             });
         }
+        // Звук приземления
+        if (typeof playBeep === 'function') playBeep(260, 0.06, 'sine');
+    }
+    
+    spawnTrail() {
+        if (Math.abs(this.player.vx) > 0.5 || Math.abs(this.player.vy) > 0.5) {
+            this.trailParticles.push({
+                x: this.player.x,
+                y: this.player.y,
+                life: 0.3,
+                maxLife: 0.3,
+                size: 4 + Math.random() * 4,
+                color: `rgba(255, 120, 160, 0.7)`
+            });
+        }
+        if (this.trailParticles.length > 20) this.trailParticles.shift();
     }
     
     loop(timestamp) {
@@ -976,7 +1019,7 @@ class PlatformFallGame {
             if (this.gameOver) this.drawGameOver();
             return;
         }
-        const delta = Math.min(timestamp - this.lastTime, 50); // ограничим для безопасности
+        const delta = Math.min(timestamp - this.lastTime, 50);
         this.lastTime = timestamp;
         
         this.update(delta);
@@ -986,16 +1029,23 @@ class PlatformFallGame {
     }
     
     update(delta) {
-        // Увеличиваем скорость со временем
-        if (this.speed < this.maxSpeed) {
+        // Задержка старта: платформы не двигаются, пока не нажата клавиша или не прошло startDelay
+        if (!this.started) {
+            if (performance.now() - this.startTimestamp > this.startDelay) {
+                this.started = true;
+            }
+        }
+        
+        // Увеличиваем скорость со временем только после старта
+        if (this.started && this.speed < this.maxSpeed) {
             this.speed += this.acceleration * delta;
         }
         
-        // Плавное горизонтальное движение (инерция)
+        // Инерция горизонтального движения
         const targetDir = (this.keys.left ? -1 : 0) + (this.keys.right ? 1 : 0);
-        const accel = 0.015;   // ускорение за мс
-        const friction = 0.008; // трение за мс
-        const maxVx = 5.5;
+        const accel = 0.015;
+        const friction = 0.008;
+        const maxVx = 6;
         
         if (targetDir !== 0) {
             this.player.vx += targetDir * accel * delta;
@@ -1003,19 +1053,18 @@ class PlatformFallGame {
                 this.player.vx = Math.sign(this.player.vx) * maxVx;
             }
         } else {
-            // Затухание
             this.player.vx *= Math.exp(-friction * delta);
         }
         
-        // Прыжок
+        // Прыжок (чуть выше)
         if (this.keys.jump && this.player.onGround) {
-            this.player.vy = -7.5;
+            this.player.vy = -8.0;
             this.player.onGround = false;
             this.keys.jump = false;
         }
         
-        // Гравитация (фиксированный шаг, как в оригинале, чтобы не зависеть от delta)
-        this.player.vy += 0.4;
+        // Гравитация (чуть слабее)
+        this.player.vy += 0.35;
         
         // Движение
         this.player.x += this.player.vx;
@@ -1025,30 +1074,30 @@ class PlatformFallGame {
         if (this.player.x - this.player.radius > this.canvas.width) this.player.x = -this.player.radius;
         if (this.player.x + this.player.radius < 0) this.player.x = this.canvas.width + this.player.radius;
         
-        // Обновление платформ: падают вниз
+        // Обновление платформ
+        const currentSpeed = this.started ? this.speed : 0;
         for (let p of this.platforms) {
-            p.y += this.speed;
+            p.y += currentSpeed;
         }
-        // Удаляем уехавшие
         this.platforms = this.platforms.filter(p => p.y < this.canvas.height + 40);
-        // Генерируем новые сверху (больше, чтобы плотнее)
-        while (this.platforms.length < 12) {
+        // Генерируем новые сверху
+        while (this.platforms.length < 15) {
             const lastPlatform = this.platforms.length > 0 ? this.platforms[this.platforms.length-1] : null;
             let newY;
             if (lastPlatform && lastPlatform.y < 0) {
-                newY = lastPlatform.y - 45 - Math.random() * 25; // ближе к предыдущей
+                newY = lastPlatform.y - 50 - Math.random() * 20;  // 50-70 промежуток
             } else {
                 newY = -30 - Math.random() * 50;
             }
             this.platforms.push({
-                x: Math.random() * (this.canvas.width - 70),
+                x: Math.random() * (this.canvas.width - 90),
                 y: newY,
-                w: 70,
+                w: 90,
                 h: 14
             });
         }
         
-        // Проверка столкновений с платформами
+        // Проверка столкновений
         this.player.prevOnGround = this.player.onGround;
         this.player.onGround = false;
         for (let p of this.platforms) {
@@ -1057,29 +1106,31 @@ class PlatformFallGame {
                 this.player.y - this.player.radius < p.y + p.h &&
                 this.player.x + this.player.radius > p.x &&
                 this.player.x - this.player.radius < p.x + p.w) {
-                // Приземление
                 this.player.y = p.y - this.player.radius;
                 this.player.vy = 0;
                 this.player.onGround = true;
             }
         }
         
-        // Эффект приземления (если только что приземлился)
+        // Приземление – частицы
         if (this.player.onGround && !this.player.prevOnGround) {
             this.spawnLandingParticles(this.player.x, this.player.y + this.player.radius);
-            // Звук приземления (тихий)
-            if (typeof playBeep === 'function') playBeep(220, 0.08, 'sine');
         }
         
-        // Game Over при падении за экран
+        // Шлейф за сердечком
+        this.spawnTrail();
+        
+        // Game Over
         if (this.player.y - this.player.radius > this.canvas.height) {
             this.gameOver = true;
             this.saveBestScore();
         }
         
         // Очки
-        this.score += this.speed * delta * 0.015;
-        this.scoreDisplay.textContent = Math.floor(this.score);
+        if (this.started) {
+            this.score += this.speed * delta * 0.015;
+            this.scoreDisplay.textContent = Math.floor(this.score);
+        }
         
         // Обновление частиц
         for (let p of this.particles) {
@@ -1090,10 +1141,21 @@ class PlatformFallGame {
         }
         this.particles = this.particles.filter(p => p.life > 0);
         
+        for (let t of this.trailParticles) {
+            t.life -= delta * 0.001;
+        }
+        this.trailParticles = this.trailParticles.filter(t => t.life > 0);
+        
         // Движение облаков
         for (let c of this.clouds) {
             c.x -= c.speed;
             if (c.x + c.width < 0) c.x = this.canvas.width + 20;
+        }
+        
+        // Мерцание звёзд
+        for (let s of this.stars) {
+            s.brightness += s.twinkleSpeed;
+            if (s.brightness > 1 || s.brightness < 0.2) s.twinkleSpeed *= -1;
         }
     }
     
@@ -1102,12 +1164,12 @@ class PlatformFallGame {
         const W = this.canvas.width;
         const H = this.canvas.height;
         
-        // Закатное небо (градиент)
+        // Закатное небо
         const gradient = ctx.createLinearGradient(0, 0, 0, H);
-        gradient.addColorStop(0, '#1a1a3e');
-        gradient.addColorStop(0.5, '#4a2c5e');
-        gradient.addColorStop(0.8, '#b85c6e');
-        gradient.addColorStop(1, '#ffb7b2');
+        gradient.addColorStop(0, '#0d0d2b');
+        gradient.addColorStop(0.4, '#4a235a');
+        gradient.addColorStop(0.7, '#c94b6c');
+        gradient.addColorStop(1, '#f7a8a0');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, W, H);
         
@@ -1121,15 +1183,24 @@ class PlatformFallGame {
         }
         ctx.globalAlpha = 1;
         
-        // Облака (полупрозрачные)
-        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        // Облака
         for (let c of this.clouds) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${c.opacity})`;
             ctx.beginPath();
             const cy = c.y;
             const cx = c.x;
-            ctx.ellipse(cx, cy, c.width*0.5, 20, 0, 0, Math.PI*2);
-            ctx.ellipse(cx + c.width*0.25, cy - 12, c.width*0.4, 18, 0, 0, Math.PI*2);
-            ctx.ellipse(cx - c.width*0.2, cy - 8, c.width*0.35, 16, 0, 0, Math.PI*2);
+            ctx.ellipse(cx, cy, c.width*0.5, c.height*0.5, 0, 0, Math.PI*2);
+            ctx.ellipse(cx + c.width*0.3, cy - c.height*0.4, c.width*0.4, c.height*0.4, 0, 0, Math.PI*2);
+            ctx.ellipse(cx - c.width*0.25, cy - c.height*0.3, c.width*0.35, c.height*0.35, 0, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        // Шлейф
+        for (let t of this.trailParticles) {
+            const alpha = t.life / t.maxLife;
+            ctx.fillStyle = `rgba(255, 130, 150, ${alpha * 0.6})`;
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, t.size * alpha, 0, Math.PI*2);
             ctx.fill();
         }
         
@@ -1138,52 +1209,62 @@ class PlatformFallGame {
             this.drawPlatform(p);
         }
         
-        // Частицы
+        // Частицы приземления
         for (let p of this.particles) {
             const alpha = p.life / p.maxLife;
-            ctx.fillStyle = `rgba(255, 220, 180, ${alpha})`;
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = alpha;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI*2);
             ctx.fill();
         }
+        ctx.globalAlpha = 1;
         
         // Игрок
         this.drawPlayer();
         
-        // Счёт (красивая надпись)
-        ctx.font = 'bold 18px system-ui';
+        // Счёт
+        ctx.font = 'bold 20px system-ui';
         ctx.fillStyle = '#fff';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowColor = 'rgba(0,0,0,0.6)';
         ctx.shadowBlur = 6;
         ctx.textAlign = 'right';
-        ctx.fillText('❤️ ' + Math.floor(this.score), W - 15, 35);
+        ctx.fillText('❤️ ' + Math.floor(this.score), W - 15, 40);
         ctx.shadowBlur = 0;
         ctx.shadowColor = 'transparent';
+        
+        // Если игра ещё не стартовала, подсказка
+        if (!this.started && !this.gameOver) {
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = '16px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText('Нажми стрелку или прыжок ✨', W/2, H/2 - 30);
+        }
     }
     
     drawPlatform(p) {
         const ctx = this.ctx;
         const x = p.x, y = p.y, w = p.w, h = p.h;
-        const radius = 6;
+        const radius = 7;
         // Тень
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
         ctx.beginPath();
-        ctx.moveTo(x + radius + 2, y + h + 2);
-        ctx.lineTo(x + w - radius + 2, y + h + 2);
-        ctx.quadraticCurveTo(x + w + 2, y + h + 2, x + w + 2, y + h - radius + 2);
-        ctx.lineTo(x + w + 2, y + radius + 2);
-        ctx.quadraticCurveTo(x + w + 2, y + 2, x + w - radius + 2, y + 2);
-        ctx.lineTo(x + radius + 2, y + 2);
-        ctx.quadraticCurveTo(x + 2, y + 2, x + 2, y + radius + 2);
-        ctx.lineTo(x + 2, y + h - radius + 2);
-        ctx.quadraticCurveTo(x + 2, y + h + 2, x + radius + 2, y + h + 2);
+        ctx.moveTo(x + radius + 3, y + h + 3);
+        ctx.lineTo(x + w - radius + 3, y + h + 3);
+        ctx.quadraticCurveTo(x + w + 3, y + h + 3, x + w + 3, y + h - radius + 3);
+        ctx.lineTo(x + w + 3, y + radius + 3);
+        ctx.quadraticCurveTo(x + w + 3, y + 3, x + w - radius + 3, y + 3);
+        ctx.lineTo(x + radius + 3, y + 3);
+        ctx.quadraticCurveTo(x + 3, y + 3, x + 3, y + radius + 3);
+        ctx.lineTo(x + 3, y + h - radius + 3);
+        ctx.quadraticCurveTo(x + 3, y + h + 3, x + radius + 3, y + h + 3);
         ctx.fill();
         
-        // Доска (градиент)
+        // Доска
         const grad = ctx.createLinearGradient(x, y, x, y + h);
-        grad.addColorStop(0, '#c49a6c');
-        grad.addColorStop(0.5, '#a67c52');
-        grad.addColorStop(1, '#7b5e3b');
+        grad.addColorStop(0, '#d9b382');
+        grad.addColorStop(0.3, '#b8855a');
+        grad.addColorStop(1, '#8b5a3c');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(x + radius, y);
@@ -1197,35 +1278,64 @@ class PlatformFallGame {
         ctx.quadraticCurveTo(x, y, x + radius, y);
         ctx.fill();
         
-        // Полосы дерева (декор)
-        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-        ctx.lineWidth = 1;
-        for (let i = 1; i <= 4; i++) {
-            const ly = y + i * (h / 5);
+        // Прожилки дерева
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = 1.2;
+        for (let i = 1; i <= 5; i++) {
+            const ly = y + i * (h / 6);
             ctx.beginPath();
-            ctx.moveTo(x + 4, ly);
-            ctx.lineTo(x + w - 4, ly);
+            ctx.moveTo(x + 6, ly);
+            ctx.lineTo(x + w - 6, ly);
             ctx.stroke();
         }
+        // Гвоздики по углам
+        ctx.fillStyle = '#555';
+        const nailR = 2.5;
+        [
+            [x + 10, y + h/2],
+            [x + w - 10, y + h/2]
+        ].forEach(([nx, ny]) => {
+            ctx.beginPath();
+            ctx.arc(nx, ny, nailR, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#ddd';
+            ctx.beginPath();
+            ctx.arc(nx-0.5, ny-0.5, nailR*0.6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#555';
+        });
+        
+        // Блик сверху
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.fillRect(x + 4, y + 1, w - 8, 2);
     }
     
     drawPlayer() {
         const ctx = this.ctx;
         const { x, y, radius: r } = this.player;
-        // Тень под сердечком
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.beginPath();
-        ctx.ellipse(x, y + r + 2, r * 0.8, r * 0.3, 0, 0, Math.PI*2);
-        ctx.fill();
         
-        // Сердечко с градиентом
+        // Свечение
+        ctx.shadowColor = '#ff7b9c';
+        ctx.shadowBlur = 15;
+        
+        // Тень
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.beginPath();
+        ctx.ellipse(x, y + r + 2, r * 0.9, r * 0.4, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+        
+        // Сердечко с градиентом и пульсацией
+        const pulse = 1 + Math.sin(performance.now() * 0.01) * 0.05;  // лёгкая пульсация
         ctx.save();
         ctx.translate(x, y);
-        ctx.scale(r/16, r/16);
+        ctx.scale(r/16 * pulse, r/16 * pulse);
+        
         const grad = ctx.createRadialGradient(-4, -4, 2, 0, 0, 18);
-        grad.addColorStop(0, '#ff7b9c');
-        grad.addColorStop(0.7, '#e63e62');
-        grad.addColorStop(1, '#b81b3a');
+        grad.addColorStop(0, '#ffb3c6');
+        grad.addColorStop(0.5, '#ff4d6d');
+        grad.addColorStop(1, '#c9184a');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.moveTo(0, 4);
@@ -1234,9 +1344,9 @@ class PlatformFallGame {
         ctx.fill();
         
         // Блик
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
         ctx.beginPath();
-        ctx.ellipse(-4, -4, 3, 1.8, -0.5, 0, Math.PI*2);
+        ctx.ellipse(-4, -4, 3.5, 2, -0.5, 0, Math.PI*2);
         ctx.fill();
         
         ctx.restore();
@@ -1244,14 +1354,14 @@ class PlatformFallGame {
     
     drawGameOver() {
         const ctx = this.ctx;
-        ctx.globalAlpha = 0.8;
-        ctx.fillStyle = '#1e1024';
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = '#1c0d14';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.globalAlpha = 1;
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 24px system-ui';
+        ctx.font = 'bold 26px system-ui';
         ctx.textAlign = 'center';
-        ctx.fillText('💔 Попробуй ещё раз', this.canvas.width/2, this.canvas.height/2 - 5);
+        ctx.fillText('💔 Попробуй ещё раз', this.canvas.width/2, this.canvas.height/2 - 10);
         ctx.font = '16px system-ui';
         ctx.fillText('(кликни по экрану)', this.canvas.width/2, this.canvas.height/2 + 35);
     }
@@ -1289,37 +1399,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if (splash) {
             splash.style.opacity = '0';
             setTimeout(() => splash.remove(), 500);
-
         }
     }, 1500);
-// Если страница загрузилась не на платформере, убедимся, что игра не крутится
-if (!document.getElementById('platformer')?.classList.contains('active')) {
-    stopPlatformer();
-}
-
+    
+    // Если страница загрузилась не на платформере, убедимся, что игра не крутится
+    if (!document.getElementById('platformer')?.classList.contains('active')) {
+        stopPlatformer();
+    }
+    
     // Вкладки
     const tabs = document.querySelectorAll('.tab-btn');
     const contents = document.querySelectorAll('.tab-content');
     tabs.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const tabId = btn.getAttribute('data-tab');
-        tabs.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        contents.forEach(content => content.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            tabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
 
-        // Останавливаем предыдущий платформер, если был
-        if (tabId !== 'platformer') stopPlatformer();
+            if (tabId !== 'platformer') stopPlatformer();
 
-        if (tabId === 'phrases') updateRandomPhrase();
-        if (tabId === 'game') {
-            if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
-            else updateScoreUI();
-        }
-        if (tabId === 'achievements') renderAchievements();
-        if (tabId === 'platformer') initPlatformer();
+            if (tabId === 'phrases') updateRandomPhrase();
+            if (tabId === 'game') {
+                if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
+                else updateScoreUI();
+            }
+            if (tabId === 'achievements') renderAchievements();
+            if (tabId === 'platformer') initPlatformer();
+        });
     });
-});
 
     loadGallery();
     updateRandomPhrase();
@@ -1335,10 +1444,7 @@ if (!document.getElementById('platformer')?.classList.contains('active')) {
         if (!window.gameInitialized) { initGame(); window.gameInitialized = true; }
     }
 
-    // Кнопка музыки
-        createMusicPlayer();
-
-    // Загружаем достижения
+    createMusicPlayer();
     loadAchievements();
     renderAchievements();
 });
