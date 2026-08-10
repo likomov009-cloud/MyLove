@@ -36,12 +36,91 @@
 
     <!-- Слова -->
     <div class="tab-content active" id="words">
-        <div class="card">
-            <p>Моя хорошая, я помню все твои эмоции в те дни. Ты прошла через боль, которую не пожелаешь никому. И ты выстояла. Твоя сила — в твоей нежности, запомни это.</p>
-            <p>Твой брат всегда с тобой. В каждой твоей улыбке, в каждом воспоминании, в каждом шаге. Он живёт в твоём сердце — и это сердце такое большое, что хватит места и для радости, и для светлой грусти.</p>
-            <p>Теперь я рядом. Каждый день. Могу обнять, когда захочешь. Но пусть это приложение останется местом, куда можно заглянуть в минуту тишины — и почувствовать, что ты не одна. Никогда.</p>
-            <p>Я люблю тебя, моя маленькая девочка. Ты справляешься так, что я горжусь каждым твоим днём.</p>
+
+        <section class="home-hero">
+            <div class="home-hero-glow"></div>
+    
+            <div class="home-heart">❤️</div>
+    
+            <div class="home-kicker">МАЛЕНЬКОЕ МЕСТО ДЛЯ ТЕБЯ</div>
+    
+            <h2>Ты не одна</h2>
+    
+            <p>
+                Здесь всегда есть немного тепла,
+                немного меня и очень много любви.
+            </p>
+        </section>
+    
+        <section class="home-quick-card">
+            <div class="home-quick-icon">💌</div>
+    
+            <div>
+                <div class="home-quick-label">СЕГОДНЯ ДЛЯ ТЕБЯ</div>
+                <div class="home-quick-text">
+                    Открой что-нибудь случайное ❤️
+                </div>
+            </div>
+    
+            <button
+                class="home-quick-button"
+                data-open-tab="phrases">
+                →
+            </button>
+        </section>
+    
+        <section class="home-menu">
+    
+            <button class="home-menu-card" data-open-tab="photos">
+                <span class="home-menu-icon">📸</span>
+                <span class="home-menu-title">Наши фото</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="phrases">
+                <span class="home-menu-icon">💬</span>
+                <span class="home-menu-title">Фразы для тебя</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="letter">
+                <span class="home-menu-icon">💌</span>
+                <span class="home-menu-title">Письмо</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="game">
+                <span class="home-menu-icon">❤️</span>
+                <span class="home-menu-title">Собрать сердечки</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="platformer">
+                <span class="home-menu-icon">🎮</span>
+                <span class="home-menu-title">Прыг-скок</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="achievements">
+                <span class="home-menu-icon">🏆</span>
+                <span class="home-menu-title">Мои достижения</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+        </section>
+    
+        <div class="home-original-message">
+            <div class="card">
+                <p>Моя хорошая, я помню все твои эмоции в те дни. Ты прошла через боль, которую не пожелаешь никому. И ты выстояла. Твоя сила — в твоей нежности, запомни это.</p>
+    
+                <p>Твой брат всегда с тобой. В каждой твоей улыбке, в каждом воспоминании, в каждом шаге. Он живёт в твоём сердце — и это сердце такое большое, что хватит места и для радости, и для светлой грусти.</p>
+    
+                <p>Теперь я рядом. Каждый день. Могу обнять, когда захочешь. Но пусть это приложение останется местом, куда можно заглянуть в минуту тишины — и почувствовать, что ты не одна. Никогда.</p>
+    
+                <p>Я люблю тебя, моя маленькая девочка. Ты справляешься так, что я горжусь каждым твоим днём.</p>
+            </div>
         </div>
+    
     </div>
 
     <!-- Фото -->
@@ -110,7 +189,30 @@
         </div>
     </div>
 </div>
+<!-- Popup достижения -->
+<div id="achievementPopup" class="achievement-popup">
+    <div class="achievement-popup-backdrop"></div>
 
+    <div class="achievement-popup-card">
+        <button id="closeAchievementPopup" class="achievement-popup-close">×</button>
+
+        <div class="achievement-popup-glow"></div>
+
+        <div class="achievement-popup-icon" id="achievementPopupIcon">🏆</div>
+
+        <div class="achievement-popup-label">ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО</div>
+
+        <h2 id="achievementPopupTitle">Название</h2>
+
+        <p id="achievementPopupDesc">Описание достижения</p>
+
+        <div class="achievement-popup-hearts">❤️ ❤️ ❤️</div>
+
+        <button id="achievementPopupButton" class="achievement-popup-button">
+            Забрать ❤️
+        </button>
+    </div>
+</div>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>

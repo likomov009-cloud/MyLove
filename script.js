@@ -359,6 +359,9 @@ function addNotificationButton() {
 let currentScore = 0;
 let totalHearts = 0;
 let goal = 100;
+let comboCount = 0;
+let lastHeartClickTime = 0;
+let comboTimeout = null;
 let lastGoalReached = 0;
 let heartsElements = [];
 let gameActive = true;
@@ -406,7 +409,56 @@ function playBeep(frequency, duration, type = 'sine') {
 }
 function playCorrectSound() { playBeep(880, 0.15, 'sine'); }
 function playWrongSound() { playBeep(440, 0.2, 'triangle'); }
+function updateComboUI() {
+    const gameContainer = document.querySelector('#game .game-container');
+    if (!gameContainer) return;
 
+    let comboDisplay = document.getElementById('comboDisplay');
+
+    if (!comboDisplay) {
+        comboDisplay = document.createElement('div');
+        comboDisplay.id = 'comboDisplay';
+        comboDisplay.className = 'combo-display';
+
+        gameContainer.appendChild(comboDisplay);
+    }
+
+    if (comboCount < 2) {
+        comboDisplay.classList.remove('show');
+        return;
+    }
+
+    comboDisplay.textContent = `🔥 КОМБО ×${comboCount}`;
+    comboDisplay.classList.remove('show');
+
+    void comboDisplay.offsetWidth;
+
+    comboDisplay.classList.add('show');
+}
+
+function registerCombo() {
+    const now = Date.now();
+    const comboWindow = 1800;
+
+    if (now - lastHeartClickTime <= comboWindow) {
+        comboCount++;
+    } else {
+        comboCount = 1;
+    }
+
+    lastHeartClickTime = now;
+
+    clearTimeout(comboTimeout);
+
+    comboTimeout = setTimeout(() => {
+        comboCount = 0;
+        updateComboUI();
+    }, comboWindow);
+
+    updateComboUI();
+
+    return Math.max(1, comboCount);
+}
 function burstEffect(x, y) {
     const burst = document.createElement('div');
     burst.className = 'burst';
@@ -450,10 +502,21 @@ function showWrongClickEffect(heartElement) {
 
 function onHeartClick(heartElement) {
     if (!gameActive) return;
+
     if (heartElement !== specialHeart) {
         showWrongClickEffect(heartElement);
+
+        // Ошибка сбрасывает комбо
+        comboCount = 0;
+        lastHeartClickTime = 0;
+        clearTimeout(comboTimeout);
+        updateComboUI();
+
         return;
     }
+
+    const points = registerCombo();
+    
     // первый клик — инициализируем звук
     if (!audioContext) initAudio();
     playCorrectSound();
@@ -461,7 +524,7 @@ function onHeartClick(heartElement) {
     burstEffect(rect.left + rect.width/2, rect.top + rect.height/2);
     heartElement.style.transform = 'scale(0)';
     heartElement.style.opacity = '0';
-    currentScore++;
+    currentScore += points;
     totalHearts++;
     syncTotalHearts();
     localStorage.setItem('totalHearts', totalHearts);
@@ -729,15 +792,54 @@ function saveAchievements() {
     const unlockedIds = achievements.filter(ach => ach.unlocked).map(ach => ach.id);
     localStorage.setItem('achievements', JSON.stringify(unlockedIds));
 }
+function showAchievementPopup(achievement) {
+    const popup = document.getElementById('achievementPopup');
+    const icon = document.getElementById('achievementPopupIcon');
+    const title = document.getElementById('achievementPopupTitle');
+    const desc = document.getElementById('achievementPopupDesc');
+
+    if (!popup || !icon || !title || !desc) return;
+
+    icon.textContent = achievement.icon;
+    title.textContent = achievement.name;
+    desc.textContent = achievement.desc;
+
+    popup.classList.add('show');
+
+    if (!audioContext) {
+        initAudio();
+    }
+
+    // Небольшой праздничный звук
+    playBeep(1046, 0.12, 'sine');
+
+    setTimeout(() => {
+        playBeep(1318, 0.18, 'sine');
+    }, 120);
+}
+
+function closeAchievementPopup() {
+    const popup = document.getElementById('achievementPopup');
+
+    if (popup) {
+        popup.classList.remove('show');
+    }
+}
+
 function checkAchievements(currentTotal) {
     let newUnlock = false;
+
     achievements.forEach(ach => {
         if (!ach.unlocked && currentTotal >= ach.target) {
             ach.unlocked = true;
             newUnlock = true;
-            setTimeout(() => alert(`🏆 Новое достижение: ${ach.name}!\n${ach.desc}`), 100);
+
+            setTimeout(() => {
+                showAchievementPopup(ach);
+            }, 150);
         }
     });
+
     if (newUnlock) {
         saveAchievements();
         renderAchievements();
@@ -1447,4 +1549,39 @@ document.addEventListener('DOMContentLoaded', () => {
     createMusicPlayer();
     loadAchievements();
     renderAchievements();
+});
+// ---------- POPUP ДОСТИЖЕНИЙ ----------
+
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('closeAchievementPopup');
+    const popupButton = document.getElementById('achievementPopupButton');
+    const backdrop = document.querySelector('.achievement-popup-backdrop');
+
+    closeBtn?.addEventListener('click', closeAchievementPopup);
+    popupButton?.addEventListener('click', closeAchievementPopup);
+    backdrop?.addEventListener('click', closeAchievementPopup);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeAchievementPopup();
+        }
+    });
+});
+// ---------- НАВИГАЦИЯ ГЛАВНОГО ЭКРАНА ----------
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-open-tab]');
+
+    if (!button) return;
+
+    const tabId = button.dataset.openTab;
+    const targetTab = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+
+    if (targetTab) {
+        targetTab.click();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
 });

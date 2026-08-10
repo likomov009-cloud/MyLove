@@ -605,3 +605,442 @@ header p {
     color: #7a5a5a;
     margin-top: 8px;
 }
+
+/* =========================================================
+   POPUP ДОСТИЖЕНИЯ
+   ========================================================= */
+
+   .achievement-popup {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 20000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.achievement-popup.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.achievement-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(35, 18, 18, 0.55);
+    backdrop-filter: blur(10px);
+}
+
+.achievement-popup-card {
+    position: relative;
+    width: min(420px, 100%);
+    padding: 38px 28px 30px;
+    border-radius: 36px;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255, 215, 150, 0.35), transparent 35%),
+        linear-gradient(145deg, #fffaf7, #fff0e8);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.35),
+        0 0 60px rgba(255, 184, 100, 0.25);
+    text-align: center;
+    transform: translateY(30px) scale(0.9);
+    transition: transform 0.4s cubic-bezier(.2,.8,.2,1);
+    overflow: hidden;
+}
+
+.achievement-popup.show .achievement-popup-card {
+    transform: translateY(0) scale(1);
+}
+
+.achievement-popup-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(196, 91, 60, 0.1);
+    color: #c45b3c;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.achievement-popup-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 190, 80, 0.35);
+    border-radius: 50%;
+    filter: blur(30px);
+}
+
+.achievement-popup-icon {
+    position: relative;
+    font-size: 5rem;
+    margin-bottom: 12px;
+    animation: achievementTrophy 1.2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 8px 15px rgba(196, 91, 60, 0.2));
+}
+
+@keyframes achievementTrophy {
+    from {
+        transform: translateY(0) rotate(-4deg) scale(1);
+    }
+    to {
+        transform: translateY(-8px) rotate(4deg) scale(1.08);
+    }
+}
+
+.achievement-popup-label {
+    position: relative;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #d38a70;
+    margin-bottom: 8px;
+}
+
+.achievement-popup-card h2 {
+    position: relative;
+    color: #c45b3c;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.achievement-popup-card p {
+    position: relative;
+    color: #7a5a5a;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.achievement-popup-hearts {
+    position: relative;
+    margin: 20px 0;
+    font-size: 1.4rem;
+    letter-spacing: 5px;
+    animation: popupHearts 1.5s ease-in-out infinite;
+}
+
+@keyframes popupHearts {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+.achievement-popup-button {
+    position: relative;
+    width: 100%;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #d66b4b, #c45b3c);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(196, 91, 60, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.achievement-popup-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(196, 91, 60, 0.4);
+}
+
+.achievement-popup-button:active {
+    transform: scale(0.97);
+}
+/* =========================================================
+   КОМБО В ИГРЕ
+   ========================================================= */
+
+   .combo-display {
+    position: absolute;
+    left: 50%;
+    top: 145px;
+    transform: translateX(-50%) scale(0.6);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+
+    padding: 10px 22px;
+    border-radius: 50px;
+
+    background: linear-gradient(135deg, #ff9a6e, #c45b3c);
+    color: white;
+
+    font-size: 1.15rem;
+    font-weight: 900;
+
+    box-shadow:
+        0 8px 25px rgba(196, 91, 60, 0.35),
+        0 0 25px rgba(255, 180, 100, 0.25);
+
+    white-space: nowrap;
+}
+
+.combo-display.show {
+    animation: comboPop 0.6s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+@keyframes comboPop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(0.6);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-5px) scale(1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.game-container {
+    position: relative;
+}
+/* =========================================================
+   ГЛАВНЫЙ ЭКРАН
+   ========================================================= */
+
+   .home-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 38px 26px 32px;
+    border-radius: 38px;
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(255, 190, 150, 0.5),
+            transparent 45%
+        ),
+        linear-gradient(145deg, #fff9f5, #ffece3);
+
+    box-shadow:
+        0 15px 35px rgba(120, 60, 40, 0.1);
+}
+
+.home-hero-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255, 170, 120, 0.35);
+    filter: blur(35px);
+    border-radius: 50%;
+}
+
+.home-heart {
+    position: relative;
+    font-size: 4.5rem;
+    margin-bottom: 8px;
+
+    animation: homeHeartFloat 2.5s ease-in-out infinite;
+    filter: drop-shadow(0 10px 15px rgba(196, 91, 60, 0.25));
+}
+
+@keyframes homeHeartFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-8px) scale(1.06);
+    }
+}
+
+.home-kicker {
+    position: relative;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #d28a72;
+    margin-bottom: 8px;
+}
+
+.home-hero h2 {
+    position: relative;
+    font-size: 2.2rem;
+    color: #c45b3c;
+    margin-bottom: 8px;
+}
+
+.home-hero p {
+    position: relative;
+    max-width: 340px;
+    margin: auto;
+    color: #7a5a5a;
+    line-height: 1.5;
+    font-size: 1rem;
+}
+
+.home-quick-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    margin-top: 16px;
+    padding: 16px;
+
+    background: rgba(255,255,255,0.92);
+    border-radius: 28px;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.home-quick-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+    background: #fff0e8;
+    font-size: 1.7rem;
+}
+
+.home-quick-card > div:nth-child(2) {
+    flex: 1;
+    text-align: left;
+}
+
+.home-quick-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #d28a72;
+}
+
+.home-quick-text {
+    margin-top: 4px;
+    color: #4c3737;
+    font-weight: 600;
+}
+
+.home-quick-button {
+    width: 44px;
+    height: 44px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #c45b3c;
+    color: white;
+
+    font-size: 1.4rem;
+    cursor: pointer;
+
+    transition: transform 0.2s ease;
+}
+
+.home-quick-button:hover {
+    transform: translateX(3px);
+}
+
+.home-menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.home-menu-card {
+    position: relative;
+
+    min-height: 125px;
+    padding: 18px;
+
+    border: none;
+    border-radius: 28px;
+
+    background: rgba(255,255,255,0.94);
+
+    box-shadow: 0 7px 18px rgba(0,0,0,0.05);
+
+    text-align: left;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.home-menu-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.09);
+}
+
+.home-menu-card:active {
+    transform: scale(0.97);
+}
+
+.home-menu-icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.home-menu-title {
+    display: block;
+    color: #5b4141;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.home-menu-arrow {
+    position: absolute;
+    right: 16px;
+    bottom: 15px;
+    color: #c45b3c;
+    font-size: 1.2rem;
+}
+
+.home-original-message {
+    margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+    .home-menu {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .home-menu-card {
+        min-height: 115px;
+        padding: 15px;
+    }
+
+    .home-hero h2 {
+        font-size: 1.9rem;
+    }
+}
