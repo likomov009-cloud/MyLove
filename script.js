@@ -715,8 +715,8 @@ const achievements = [
     { id: 5, name: 'Ангел-хранитель', desc: 'Собрать 1000 сердечек', target: 1000, icon: '👼', unlocked: false },
     { id: 6, name: 'Легенда', desc: 'Собрать 2500 сердечек', target: 2500, icon: '🏆', unlocked: false },
     { id: 7, name: 'Королева', desc: 'Собрать 5000 сердечек', target: 5000, icon: '👸', unlocked: false },
-    { id  8, name: 'Императрица' desc: 'Собрать 10000 сердечек', target: 10000, icon: '👑 ', unlocked: false },
-    { id  9, name: 'Маленькая, любимая жена' desc: 'Собрать 50000 сердечек', target: 50000, icon: '👰‍♀️ ', unlocked: false }
+    { id: 8, name: 'Императрица', desc: 'Собрать 10000 сердечек', target: 10000, icon: '👑', unlocked: false },
+    { id: 9, name: 'Маленькая, любимая жена', desc: 'Собрать 50000 сердечек', target: 50000, icon: '👰‍♀️', unlocked: false }
 ];
 function loadAchievements() {
     const saved = localStorage.getItem('achievements');
