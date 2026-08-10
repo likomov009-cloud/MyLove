@@ -1585,3 +1585,2098 @@ document.addEventListener('click', (event) => {
         });
     }
 });
+// =========================================================
+// 🔎 НАЙДИ РАЗЛИЧИЯ — v2
+// Реальные визуальные изменения изображения
+// =========================================================
+
+const differenceLevels = [
+    {
+        image: 'image/f1.jpg',
+        difficulty: 'easy',
+        time: 120,
+        differences: [
+            { x: 0.18, y: 0.22, type: 'mirror', size: 0.055 },
+            { x: 0.39, y: 0.31, type: 'color', size: 0.045 },
+            { x: 0.58, y: 0.21, type: 'brightness', size: 0.05 },
+            { x: 0.77, y: 0.38, type: 'blur', size: 0.045 },
+            { x: 0.69, y: 0.70, type: 'erase', size: 0.05 }
+        ]
+    },
+
+    {
+        image: 'image/f2.jpg',
+        difficulty: 'easy',
+        time: 115,
+        differences: [
+            { x: 0.22, y: 0.27, type: 'color', size: 0.05 },
+            { x: 0.42, y: 0.19, type: 'mirror', size: 0.045 },
+            { x: 0.59, y: 0.35, type: 'blur', size: 0.05 },
+            { x: 0.76, y: 0.24, type: 'brightness', size: 0.045 },
+            { x: 0.32, y: 0.73, type: 'erase', size: 0.05 }
+        ]
+    },
+
+    {
+        image: 'image/f3.jpg',
+        difficulty: 'medium',
+        time: 100,
+        differences: [
+            { x: 0.15, y: 0.19, type: 'mirror', size: 0.042 },
+            { x: 0.30, y: 0.34, type: 'color', size: 0.04 },
+            { x: 0.49, y: 0.22, type: 'blur', size: 0.043 },
+            { x: 0.66, y: 0.31, type: 'brightness', size: 0.042 },
+            { x: 0.82, y: 0.47, type: 'erase', size: 0.04 },
+            { x: 0.39, y: 0.72, type: 'mirror', size: 0.04 },
+            { x: 0.70, y: 0.76, type: 'color', size: 0.04 }
+        ]
+    },
+
+    {
+        image: 'image/f4.jpg',
+        difficulty: 'medium',
+        time: 95,
+        differences: [
+            { x: 0.19, y: 0.24, type: 'brightness', size: 0.04 },
+            { x: 0.35, y: 0.17, type: 'mirror', size: 0.042 },
+            { x: 0.51, y: 0.31, type: 'color', size: 0.04 },
+            { x: 0.68, y: 0.22, type: 'blur', size: 0.042 },
+            { x: 0.84, y: 0.42, type: 'erase', size: 0.04 },
+            { x: 0.43, y: 0.76, type: 'mirror', size: 0.04 },
+            { x: 0.72, y: 0.73, type: 'brightness', size: 0.04 }
+        ]
+    },
+
+    {
+        image: 'image/f5.jpg',
+        difficulty: 'hard',
+        time: 80,
+        differences: [
+            { x: 0.16, y: 0.20, type: 'color', size: 0.035 },
+            { x: 0.30, y: 0.29, type: 'mirror', size: 0.037 },
+            { x: 0.45, y: 0.18, type: 'blur', size: 0.035 },
+            { x: 0.61, y: 0.28, type: 'brightness', size: 0.037 },
+            { x: 0.78, y: 0.19, type: 'erase', size: 0.035 },
+            { x: 0.87, y: 0.51, type: 'mirror', size: 0.035 },
+            { x: 0.28, y: 0.71, type: 'color', size: 0.035 },
+            { x: 0.55, y: 0.77, type: 'blur', size: 0.035 },
+            { x: 0.73, y: 0.69, type: 'brightness', size: 0.035 }
+        ]
+    },
+
+    {
+        image: 'image/f6.jpg',
+        difficulty: 'hard',
+        time: 75,
+        differences: [
+            { x: 0.14, y: 0.26, type: 'mirror', size: 0.034 },
+            { x: 0.28, y: 0.18, type: 'color', size: 0.034 },
+            { x: 0.43, y: 0.31, type: 'blur', size: 0.034 },
+            { x: 0.58, y: 0.20, type: 'brightness', size: 0.034 },
+            { x: 0.72, y: 0.29, type: 'erase', size: 0.034 },
+            { x: 0.86, y: 0.41, type: 'color', size: 0.034 },
+            { x: 0.33, y: 0.74, type: 'mirror', size: 0.034 },
+            { x: 0.54, y: 0.70, type: 'blur', size: 0.034 },
+            { x: 0.76, y: 0.77, type: 'brightness', size: 0.034 }
+        ]
+    },
+
+    {
+        image: 'image/f7.jpg',
+        difficulty: 'expert',
+        time: 65,
+        differences: [
+            { x: 0.15, y: 0.19, type: 'mirror', size: 0.028 },
+            { x: 0.27, y: 0.28, type: 'color', size: 0.028 },
+            { x: 0.39, y: 0.17, type: 'brightness', size: 0.028 },
+            { x: 0.51, y: 0.29, type: 'blur', size: 0.028 },
+            { x: 0.64, y: 0.20, type: 'erase', size: 0.028 },
+            { x: 0.76, y: 0.31, type: 'color', size: 0.028 },
+            { x: 0.87, y: 0.48, type: 'mirror', size: 0.028 },
+            { x: 0.24, y: 0.69, type: 'brightness', size: 0.028 },
+            { x: 0.48, y: 0.77, type: 'blur', size: 0.028 },
+            { x: 0.70, y: 0.72, type: 'erase', size: 0.028 },
+            { x: 0.84, y: 0.79, type: 'color', size: 0.028 }
+        ]
+    },
+
+    {
+        image: 'image/f8.jpg',
+        difficulty: 'expert',
+        time: 60,
+        differences: [
+            { x: 0.14, y: 0.22, type: 'brightness', size: 0.026 },
+            { x: 0.26, y: 0.35, type: 'mirror', size: 0.026 },
+            { x: 0.38, y: 0.18, type: 'color', size: 0.026 },
+            { x: 0.49, y: 0.29, type: 'blur', size: 0.026 },
+            { x: 0.61, y: 0.17, type: 'erase', size: 0.026 },
+            { x: 0.73, y: 0.30, type: 'color', size: 0.026 },
+            { x: 0.85, y: 0.24, type: 'mirror', size: 0.026 },
+            { x: 0.32, y: 0.72, type: 'brightness', size: 0.026 },
+            { x: 0.51, y: 0.78, type: 'blur', size: 0.026 },
+            { x: 0.68, y: 0.70, type: 'erase', size: 0.026 },
+            { x: 0.82, y: 0.77, type: 'color', size: 0.026 },
+            { x: 0.90, y: 0.60, type: 'brightness', size: 0.026 }
+        ]
+    }
+];
+
+
+// =========================================================
+// Состояние
+// =========================================================
+
+const diffGame = {
+    level: Number(localStorage.getItem('diffLevel') || 0),
+
+    found: [],
+
+    lives: 3,
+
+    hints: 3,
+
+    score: 0,
+
+    combo: 0,
+
+    bestCombo: 0,
+
+    timeLeft: 0,
+
+    timer: null,
+
+    running: false,
+
+    image: null,
+
+    leftCanvas: null,
+
+    rightCanvas: null,
+
+    leftCtx: null,
+
+    rightCtx: null,
+
+    differenceRegions: [],
+
+    initialized: false
+};
+
+
+// =========================================================
+// Инициализация
+// =========================================================
+
+function initDifferencesGameV2() {
+
+    if (diffGame.initialized) return;
+
+    diffGame.leftCanvas =
+        document.getElementById('diffCanvasLeft');
+
+    diffGame.rightCanvas =
+        document.getElementById('diffCanvasRight');
+
+    if (!diffGame.leftCanvas || !diffGame.rightCanvas) {
+        console.warn('Find the Difference: canvas не найден.');
+        return;
+    }
+
+    diffGame.leftCtx =
+        diffGame.leftCanvas.getContext('2d');
+
+    diffGame.rightCtx =
+        diffGame.rightCanvas.getContext('2d');
+
+    diffGame.leftCanvas.addEventListener(
+        'click',
+        e => handleDiffClickV2(e, 'left')
+    );
+
+    diffGame.rightCanvas.addEventListener(
+        'click',
+        e => handleDiffClickV2(e, 'right')
+    );
+
+    document
+        .getElementById('diffHintBtn')
+        ?.addEventListener(
+            'click',
+            useDiffHintV2
+        );
+        document
+    .getElementById('diffZoomBtn')
+    ?.addEventListener(
+        'click',
+        () => {
+            const board = document.querySelector('.differences-board');
+
+            if (!board) return;
+
+            board.classList.toggle('zoomed');
+        }
+    );
+
+    document
+        .getElementById('diffRestartBtn')
+        ?.addEventListener(
+            'click',
+            () => loadDiffLevelV2(diffGame.level)
+        );
+
+    document
+        .getElementById('diffNextLevelBtn')
+        ?.addEventListener(
+            'click',
+            nextDiffLevelV2
+        );
+
+    document
+        .getElementById('diffRetryBtn')
+        ?.addEventListener(
+            'click',
+            () => {
+                closeDiffResultV2();
+                loadDiffLevelV2(diffGame.level);
+            }
+        );
+
+    diffGame.initialized = true;
+
+    renderDiffLevelsV2();
+
+    loadDiffLevelV2(diffGame.level);
+}
+
+
+// =========================================================
+// Загрузка уровня
+// =========================================================
+
+function loadDiffLevelV2(index) {
+
+    if (index < 0) index = 0;
+
+    if (index >= differenceLevels.length) {
+        index = differenceLevels.length - 1;
+    }
+
+    stopDiffTimerV2();
+
+    const level = differenceLevels[index];
+
+    diffGame.level = index;
+
+// Обновляем визуальный список уровней
+// чтобы текущий уровень подсветился правильно.
+renderDiffLevelsV2();
+
+diffGame.found = [];
+
+diffGame.lives =
+    level.difficulty === 'easy' ? 4 : 3;
+
+    diffGame.hints =
+        level.difficulty === 'easy' ? 3 : 2;
+
+    diffGame.combo = 0;
+    diffGame.score = 0;
+    diffGame.timeLeft = level.time;
+    diffGame.running = false;
+
+    localStorage.setItem(
+        'diffLevel',
+        index
+    );
+
+    updateDiffUIV2();
+
+    const image = new Image();
+
+    image.onload = () => {
+
+        diffGame.image = image;
+
+        setupDiffCanvasesV2();
+
+        createDifferenceRegionsV2();
+
+        drawDiffImagesV2();
+
+        diffGame.running = true;
+
+        startDiffTimerV2();
+
+    };
+
+    image.onerror = () => {
+
+        console.error(
+            'Find the Difference: не удалось загрузить',
+            level.image
+        );
+
+    };
+
+    image.src = level.image;
+}
+
+
+// =========================================================
+// Canvas
+// =========================================================
+
+function setupDiffCanvasesV2() {
+
+    const image = diffGame.image;
+
+    const maxWidth = 900;
+    const maxHeight = 650;
+
+    const ratio = Math.min(
+        maxWidth / image.width,
+        maxHeight / image.height,
+        1
+    );
+
+    const width =
+        Math.floor(image.width * ratio);
+
+    const height =
+        Math.floor(image.height * ratio);
+
+    diffGame.leftCanvas.width = width;
+    diffGame.leftCanvas.height = height;
+
+    diffGame.rightCanvas.width = width;
+    diffGame.rightCanvas.height = height;
+
+    diffGame.leftCanvas.style.aspectRatio =
+        `${width}/${height}`;
+
+    diffGame.rightCanvas.style.aspectRatio =
+        `${width}/${height}`;
+}
+
+
+// =========================================================
+// Создание областей различий
+// =========================================================
+
+function createDifferenceRegionsV2() {
+
+    const level =
+        differenceLevels[diffGame.level];
+
+    diffGame.differenceRegions =
+        level.differences.map(
+            (difference, index) => ({
+                ...difference,
+
+                index,
+
+                found: false,
+
+                // реальный размер области
+                radius:
+                    Math.max(
+                        10,
+                        difference.size *
+                        Math.min(
+                            diffGame.rightCanvas.width,
+                            diffGame.rightCanvas.height
+                        )
+                    )
+            })
+        );
+
+}
+
+
+// =========================================================
+// Рисуем изображения
+// =========================================================
+
+function drawDiffImagesV2() {
+
+    if (!diffGame.image) return;
+
+    const width =
+        diffGame.leftCanvas.width;
+
+    const height =
+        diffGame.leftCanvas.height;
+
+    const image =
+        diffGame.image;
+
+    diffGame.leftCtx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    diffGame.rightCtx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    // Оригинал
+    diffGame.leftCtx.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+    );
+
+    // Копия
+    diffGame.rightCtx.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+    );
+
+    // Применяем отличия
+    diffGame.differenceRegions.forEach(
+        difference => {
+
+            if (
+                diffGame.found.includes(
+                    difference.index
+                )
+            ) {
+                return;
+            }
+
+            applyVisualDifference(
+                diffGame.rightCtx,
+                difference,
+                width,
+                height
+            );
+
+        }
+    );
+
+    // Показываем найденные области
+    diffGame.differenceRegions.forEach(
+        difference => {
+
+            if (
+                diffGame.found.includes(
+                    difference.index
+                )
+            ) {
+
+                drawFoundDifferenceMarker(
+                    diffGame.leftCtx,
+                    difference,
+                    width,
+                    height
+                );
+
+                drawFoundDifferenceMarker(
+                    diffGame.rightCtx,
+                    difference,
+                    width,
+                    height
+                );
+
+            }
+
+        }
+    );
+}
+
+
+// =========================================================
+// Реальные визуальные изменения
+// =========================================================
+
+function applyVisualDifference(
+    ctx,
+    difference,
+    width,
+    height
+) {
+
+    const x =
+        difference.x * width;
+
+    const y =
+        difference.y * height;
+
+    const radius =
+        difference.radius;
+
+    ctx.save();
+
+    switch (difference.type) {
+
+        case 'mirror':
+            applyMirrorDifference(
+                ctx,
+                x,
+                y,
+                radius
+            );
+            break;
+
+        case 'color':
+            applyColorDifference(
+                ctx,
+                x,
+                y,
+                radius
+            );
+            break;
+
+        case 'brightness':
+            applyBrightnessDifference(
+                ctx,
+                x,
+                y,
+                radius
+            );
+            break;
+
+        case 'blur':
+            applyBlurDifference(
+                ctx,
+                x,
+                y,
+                radius
+            );
+            break;
+
+        case 'erase':
+            applyEraseDifference(
+                ctx,
+                x,
+                y,
+                radius
+            );
+            break;
+    }
+
+    ctx.restore();
+}
+
+
+// =========================================================
+// Зеркало
+// =========================================================
+
+function applyMirrorDifference(
+    ctx,
+    x,
+    y,
+    radius
+) {
+
+    const size =
+        radius * 2;
+
+    const temp =
+        document.createElement('canvas');
+
+    temp.width = size;
+    temp.height = size;
+
+    const tempCtx =
+        temp.getContext('2d');
+
+    tempCtx.translate(size, 0);
+    tempCtx.scale(-1, 1);
+
+    tempCtx.drawImage(
+        diffGame.image,
+
+        (x - radius),
+        (y - radius),
+        size,
+        size,
+
+        0,
+        0,
+        size,
+        size
+    );
+
+    ctx.globalAlpha = 0.95;
+
+    ctx.drawImage(
+        temp,
+        x - radius,
+        y - radius
+    );
+
+}
+
+
+// =========================================================
+// Изменение цвета
+// =========================================================
+
+function applyColorDifference(
+    ctx,
+    x,
+    y,
+    radius
+) {
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.clip();
+
+    ctx.filter =
+        'saturate(1.6) hue-rotate(12deg) brightness(1.08)';
+
+    ctx.drawImage(
+        diffGame.image,
+        0,
+        0,
+        ctx.canvas.width,
+        ctx.canvas.height
+    );
+
+    ctx.restore();
+}
+
+
+// =========================================================
+// Яркость
+// =========================================================
+
+function applyBrightnessDifference(
+    ctx,
+    x,
+    y,
+    radius
+) {
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.clip();
+
+    ctx.filter =
+        'brightness(1.38) contrast(1.08)';
+
+    ctx.drawImage(
+        diffGame.image,
+        0,
+        0,
+        ctx.canvas.width,
+        ctx.canvas.height
+    );
+
+    ctx.restore();
+
+}
+
+
+// =========================================================
+// Размытие
+// =========================================================
+
+function applyBlurDifference(
+    ctx,
+    x,
+    y,
+    radius
+) {
+
+    ctx.save();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.clip();
+
+    ctx.filter =
+        'blur(4px)';
+
+    ctx.drawImage(
+        diffGame.image,
+        0,
+        0,
+        ctx.canvas.width,
+        ctx.canvas.height
+    );
+
+    ctx.restore();
+
+}
+
+
+// =========================================================
+// Удаление / маскировка
+// =========================================================
+
+function applyEraseDifference(
+    ctx,
+    x,
+    y,
+    radius
+) {
+
+    const size =
+        radius * 2;
+
+    // Берём соседний участок фотографии
+    // и очень мягко накладываем его поверх
+    // выбранной области.
+
+    const sourceX =
+        Math.max(
+            0,
+            x - radius * 2.2
+        );
+
+    const sourceY =
+        Math.max(
+            0,
+            y - radius * 1.4
+        );
+
+    ctx.save();
+
+    ctx.globalAlpha = 0.92;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.clip();
+
+    ctx.drawImage(
+        diffGame.image,
+
+        sourceX,
+        sourceY,
+        size,
+        size,
+
+        x - radius,
+        y - radius,
+        size,
+        size
+    );
+
+    ctx.restore();
+
+}
+
+
+// =========================================================
+// Обработка клика
+// =========================================================
+
+// =========================================================
+// Обработка клика по отличию
+// =========================================================
+
+function handleDiffClickV2(
+    event,
+    side
+) {
+    if (!diffGame.running) {
+        console.log('Игра ещё не запущена');
+        return;
+    }
+
+    const canvas = event.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+
+    // Координаты клика в процентах от Canvas
+    const x =
+        (event.clientX - rect.left) / rect.width;
+
+    const y =
+        (event.clientY - rect.top) / rect.height;
+
+    console.log(
+        'КЛИК:',
+        side,
+        'x =',
+        x.toFixed(3),
+        'y =',
+        y.toFixed(3)
+    );
+
+    let foundIndex = -1;
+
+    for (
+        let i = 0;
+        i < diffGame.differenceRegions.length;
+        i++
+    ) {
+        const difference =
+            diffGame.differenceRegions[i];
+
+        if (
+            diffGame.found.includes(
+                difference.index
+            )
+        ) {
+            continue;
+        }
+
+        const dx =
+            x - difference.x;
+
+        const dy =
+            y - difference.y;
+
+        const distance =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+        // Увеличиваем область попадания
+        const tolerance =
+            Math.max(
+                difference.size * 2.5,
+                0.07
+            );
+
+        console.log(
+            'Проверка:',
+            difference.index,
+            'distance =',
+            distance.toFixed(3),
+            'tolerance =',
+            tolerance.toFixed(3)
+        );
+
+        if (
+            distance <= tolerance
+        ) {
+            foundIndex =
+                difference.index;
+
+            break;
+        }
+    }
+
+    if (foundIndex !== -1) {
+
+        console.log(
+            '✅ НАЙДЕНО:',
+            foundIndex
+        );
+
+        foundDifferenceV2(
+            foundIndex
+        );
+
+    } else {
+
+        console.log(
+            '❌ Мимо'
+        );
+
+        wrongDifferenceV2(
+            canvas
+        );
+    }
+}
+
+
+// =========================================================
+// Правильный ответ
+// =========================================================
+
+function foundDifferenceV2(index) {
+
+    diffGame.found.push(index);
+
+    diffGame.combo++;
+
+    diffGame.bestCombo =
+        Math.max(
+            diffGame.bestCombo,
+            diffGame.combo
+        );
+
+    const comboMultiplier =
+        Math.min(
+            1 + diffGame.combo * 0.25,
+            3
+        );
+
+    const points =
+        Math.round(
+            100 * comboMultiplier
+        );
+
+    diffGame.score += points;
+
+    showDiffFeedbackV2(
+        diffGame.combo >= 3
+            ? `🔥 КОМБО ×${diffGame.combo}  +${points}`
+            : `✨ Отличие найдено  +${points}`,
+        true
+    );
+
+    drawDiffImagesV2();
+
+    updateDiffUIV2();
+
+    if (
+        diffGame.found.length ===
+        diffGame.differenceRegions.length
+    ) {
+
+        finishDiffLevelV2();
+
+    }
+
+}
+
+
+// =========================================================
+// Ошибка
+// =========================================================
+
+function wrongDifferenceV2(canvas) {
+
+    diffGame.lives--;
+
+    diffGame.combo = 0;
+
+    diffGame.timeLeft =
+        Math.max(
+            0,
+            diffGame.timeLeft - 7
+        );
+
+    canvas.classList.remove(
+        'difference-mistake'
+    );
+
+    void canvas.offsetWidth;
+
+    canvas.classList.add(
+        'difference-mistake'
+    );
+
+    showDiffFeedbackV2(
+        '💔 Не здесь — серия сбита',
+        false
+    );
+
+    updateDiffUIV2();
+
+    if (
+        diffGame.lives <= 0
+    ) {
+
+        finishDiffFailureV2();
+
+    }
+
+}
+
+
+// =========================================================
+// Подсказка
+// =========================================================
+
+function useDiffHintV2() {
+
+    if (!diffGame.running) return;
+
+    if (diffGame.hints <= 0) {
+
+        showDiffFeedbackV2(
+            '💡 Подсказки закончились',
+            false
+        );
+
+        return;
+    }
+
+    const available =
+        diffGame.differenceRegions
+            .filter(
+                d =>
+                    !diffGame.found.includes(
+                        d.index
+                    )
+            );
+
+    if (!available.length) return;
+
+    const target =
+        available[
+            Math.floor(
+                Math.random() *
+                available.length
+            )
+        ];
+
+    diffGame.hints--;
+
+    flashDifferenceHintV2(
+        target
+    );
+
+    updateDiffUIV2();
+
+}
+
+
+// =========================================================
+// Умная подсветка подсказки
+// =========================================================
+
+function flashDifferenceHintV2(
+    difference
+) {
+
+    const canvas =
+        diffGame.rightCanvas;
+
+    const ctx =
+        diffGame.rightCtx;
+
+    const x =
+        difference.x *
+        canvas.width;
+
+    const y =
+        difference.y *
+        canvas.height;
+
+    let frame = 0;
+
+    const interval =
+        setInterval(() => {
+
+            drawDiffImagesV2();
+
+            ctx.save();
+
+            const pulse =
+                1 +
+                Math.sin(
+                    frame * 0.5
+                ) * 0.2;
+
+            ctx.strokeStyle =
+                `rgba(255,255,255,${0.9 - frame / 30})`;
+
+            ctx.lineWidth = 4;
+
+            ctx.shadowColor =
+                '#ff5d7d';
+
+            ctx.shadowBlur = 25;
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                difference.radius *
+                1.7 *
+                pulse,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.stroke();
+
+            ctx.restore();
+
+            frame++;
+
+            if (frame >= 18) {
+
+                clearInterval(
+                    interval
+                );
+
+                drawDiffImagesV2();
+
+            }
+
+        }, 90);
+
+}
+
+
+// =========================================================
+// Таймер
+// =========================================================
+
+function startDiffTimerV2() {
+
+    stopDiffTimerV2();
+
+    diffGame.timer =
+        setInterval(() => {
+
+            if (!diffGame.running) return;
+
+            diffGame.timeLeft--;
+
+            updateDiffUIV2();
+
+            if (
+                diffGame.timeLeft <= 0
+            ) {
+
+                finishDiffFailureV2();
+
+            }
+
+        }, 1000);
+
+}
+
+
+function stopDiffTimerV2() {
+
+    if (diffGame.timer) {
+
+        clearInterval(
+            diffGame.timer
+        );
+
+        diffGame.timer = null;
+
+    }
+
+}
+
+
+// =========================================================
+// Победа
+// =========================================================
+
+function finishDiffLevelV2() {
+
+    diffGame.running = false;
+
+    stopDiffTimerV2();
+
+    const speedBonus =
+        diffGame.timeLeft * 8;
+
+    const accuracyBonus =
+        diffGame.lives * 100;
+
+    const comboBonus =
+        diffGame.bestCombo * 50;
+
+    const finalScore =
+        diffGame.score +
+        speedBonus +
+        accuracyBonus +
+        comboBonus;
+
+    diffGame.score =
+        finalScore;
+
+    const unlocked =
+        Number(
+            localStorage.getItem(
+                'diffUnlocked'
+            ) || 1
+        );
+
+    if (
+        diffGame.level + 2 >
+        unlocked
+    ) {
+
+        localStorage.setItem(
+            'diffUnlocked',
+            diffGame.level + 2
+        );
+
+    }
+
+    saveDiffStatsV2();
+
+    const resultPopup =
+        document.getElementById(
+            'diffResultPopup'
+        );
+
+    if (!resultPopup) return;
+
+    document.getElementById(
+        'diffResultIcon'
+    ).textContent = '🏆';
+
+    document.getElementById(
+        'diffResultKicker'
+    ).textContent =
+        'УРОВЕНЬ ПРОЙДЕН';
+
+    document.getElementById(
+        'diffResultTitle'
+    ).textContent =
+        'Идеально! Ты нашла всё 🔎';
+
+    document.getElementById(
+        'diffResultText'
+    ).innerHTML =
+        `
+        Скорость: +${speedBonus}<br>
+        Точность: +${accuracyBonus}<br>
+        Комбо: +${comboBonus}
+        `;
+
+    document.getElementById(
+        'diffResultScore'
+    ).textContent =
+        finalScore;
+
+    const nextButton =
+        document.getElementById(
+            'diffNextLevelBtn'
+        );
+
+    if (
+        diffGame.level <
+        differenceLevels.length - 1
+    ) {
+
+        nextButton.disabled = false;
+
+        nextButton.textContent =
+            'Следующий уровень →';
+
+    } else {
+
+        nextButton.disabled = true;
+
+        nextButton.textContent =
+            '👑 Игра пройдена';
+
+    }
+
+    resultPopup.classList.add(
+        'show'
+    );
+
+    renderDiffLevelsV2();
+
+    checkDifferenceAchievementsV2();
+}
+
+
+// =========================================================
+// Проигрыш
+// =========================================================
+
+function finishDiffFailureV2() {
+
+    diffGame.running = false;
+
+    stopDiffTimerV2();
+
+    const popup =
+        document.getElementById(
+            'diffResultPopup'
+        );
+
+    if (!popup) return;
+
+    document.getElementById(
+        'diffResultIcon'
+    ).textContent =
+        '💔';
+
+    document.getElementById(
+        'diffResultKicker'
+    ).textContent =
+        'ПОЧТИ';
+
+    document.getElementById(
+        'diffResultTitle'
+    ).textContent =
+        'В этот раз не получилось';
+
+    document.getElementById(
+        'diffResultText'
+    ).textContent =
+        'Но теперь ты знаешь, где искать. Попробуем ещё раз? ❤️';
+
+    document.getElementById(
+        'diffResultScore'
+    ).textContent =
+        diffGame.score;
+
+    popup.classList.add(
+        'show'
+    );
+
+}
+
+
+// =========================================================
+// Следующий уровень
+// =========================================================
+
+function nextDiffLevelV2() {
+
+    closeDiffResultV2();
+
+    if (
+        diffGame.level <
+        differenceLevels.length - 1
+    ) {
+
+        loadDiffLevelV2(
+            diffGame.level + 1
+        );
+
+    }
+
+}
+
+
+function closeDiffResultV2() {
+
+    document
+        .getElementById(
+            'diffResultPopup'
+        )
+        ?.classList.remove(
+            'show'
+        );
+
+}
+
+
+// =========================================================
+// UI
+// =========================================================
+
+function updateDiffUIV2() {
+
+    const timer =
+        document.getElementById(
+            'diffTimer'
+        );
+
+    if (timer) {
+
+        const minutes =
+            Math.floor(
+                diffGame.timeLeft / 60
+            );
+
+        const seconds =
+            diffGame.timeLeft % 60;
+
+        timer.textContent =
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    }
+
+    const found =
+        document.getElementById(
+            'diffFound'
+        );
+
+    if (found) {
+
+        found.textContent =
+            diffGame.found.length;
+
+    }
+
+    const total =
+        document.getElementById(
+            'diffTotal'
+        );
+
+    if (total) {
+
+        total.textContent =
+            diffGame.differenceRegions.length;
+
+    }
+
+    const lives =
+        document.getElementById(
+            'diffLives'
+        );
+
+    if (lives) {
+
+        lives.textContent =
+            '❤️'.repeat(
+                Math.max(
+                    0,
+                    diffGame.lives
+                )
+            ) +
+            '🖤'.repeat(
+                Math.max(
+                    0,
+                    3 - diffGame.lives
+                )
+            );
+
+    }
+
+    const score =
+        document.getElementById(
+            'diffScore'
+        );
+
+    if (score) {
+
+        score.textContent =
+            diffGame.score;
+
+    }
+
+    const hints =
+        document.getElementById(
+            'diffHintsCount'
+        );
+
+    if (hints) {
+
+        hints.textContent =
+            diffGame.hints;
+
+    }
+
+    const levelNumber =
+        document.getElementById(
+            'diffLevelNumber'
+        );
+
+    if (levelNumber) {
+
+        levelNumber.textContent =
+            diffGame.level + 1;
+
+    }
+
+    const progress =
+        document.getElementById(
+            'diffProgressFill'
+        );
+
+    if (progress) {
+
+        const percent =
+            diffGame.differenceRegions.length
+                ? (
+                    diffGame.found.length /
+                    diffGame.differenceRegions.length
+                ) * 100
+                : 0;
+
+        progress.style.width =
+            `${percent}%`;
+
+    }
+
+    const combo =
+        document.getElementById(
+            'diffComboDisplay'
+        );
+
+    if (combo) {
+
+        combo.textContent =
+            diffGame.combo >= 2
+                ? `🔥 ×${diffGame.combo}`
+                : '';
+
+    }
+}
+
+
+// =========================================================
+// Уровни
+// =========================================================
+
+function renderDiffLevelsV2() {
+
+    const container =
+        document.getElementById(
+            'diffLevelList'
+        );
+
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const unlocked =
+        Number(
+            localStorage.getItem(
+                'diffUnlocked'
+            ) || 1
+        );
+
+    differenceLevels.forEach(
+        (level, index) => {
+
+            const button =
+                document.createElement(
+                    'button'
+                );
+
+            const available =
+                index + 1 <= unlocked;
+
+            button.className =
+                `
+                diff-level-button
+                ${index === diffGame.level ? 'current' : ''}
+                ${!available ? 'locked' : ''}
+                `;
+
+            button.innerHTML =
+                available
+                    ? `
+                        <strong>${index + 1}</strong>
+                        <small>
+                            ${getDiffDifficultyName(
+                                level.difficulty
+                            )}
+                        </small>
+                      `
+                    : '🔒';
+
+            if (available) {
+
+                button.onclick = () => {
+
+                    closeDiffResultV2();
+
+                    loadDiffLevelV2(
+                        index
+                    );
+
+                };
+
+            }
+
+            container.appendChild(
+                button
+            );
+
+        }
+    );
+
+    const progress =
+        document.getElementById(
+            'diffLevelProgress'
+        );
+
+    if (progress) {
+
+        progress.textContent =
+            `${diffGame.level + 1} / ${differenceLevels.length}`;
+
+    }
+
+}
+
+
+function getDiffDifficultyName(
+    difficulty
+) {
+
+    switch (difficulty) {
+
+        case 'easy':
+            return 'Легко';
+
+        case 'medium':
+            return 'Средне';
+
+        case 'hard':
+            return 'Сложно';
+
+        case 'expert':
+            return 'Эксперт';
+
+        default:
+            return '';
+
+    }
+
+}
+
+
+// =========================================================
+// Feedback
+// =========================================================
+
+function showDiffFeedbackV2(
+    text,
+    success
+) {
+
+    const element =
+        document.createElement(
+            'div'
+        );
+
+    element.className =
+        `
+        difference-feedback
+        ${success ? 'success' : 'error'}
+        `;
+
+    element.textContent =
+        text;
+
+    document.body.appendChild(
+        element
+    );
+
+    setTimeout(
+        () => element.remove(),
+        900
+    );
+
+}
+
+
+// =========================================================
+// Сохранение статистики
+// =========================================================
+
+function saveDiffStatsV2() {
+
+    const previousBest =
+        Number(
+            localStorage.getItem(
+                'diffBestScore'
+            ) || 0
+        );
+
+    if (
+        diffGame.score >
+        previousBest
+    ) {
+
+        localStorage.setItem(
+            'diffBestScore',
+            diffGame.score
+        );
+
+    }
+
+    const previousCombo =
+        Number(
+            localStorage.getItem(
+                'diffBestCombo'
+            ) || 0
+        );
+
+    if (
+        diffGame.bestCombo >
+        previousCombo
+    ) {
+
+        localStorage.setItem(
+            'diffBestCombo',
+            diffGame.bestCombo
+        );
+
+    }
+
+    const completed =
+        Number(
+            localStorage.getItem(
+                'diffCompleted'
+            ) || 0
+        );
+
+    localStorage.setItem(
+        'diffCompleted',
+        completed + 1
+    );
+
+}
+
+
+// =========================================================
+// ДОСТИЖЕНИЯ FIND THE DIFFERENCE
+// =========================================================
+
+const differenceAchievements = [
+
+    {
+        id: 'diff_first',
+        name: 'Острый глаз',
+        desc: 'Найти первое отличие',
+        icon: '🔎'
+    },
+
+    {
+        id: 'diff_no_mistakes',
+        name: 'Снайпер',
+        desc: 'Пройти уровень без ошибок',
+        icon: '🎯'
+    },
+
+    {
+        id: 'diff_combo5',
+        name: 'Комбо-машина',
+        desc: 'Сделать серию ×5',
+        icon: '🔥'
+    },
+
+    {
+        id: 'diff_speed',
+        name: 'Молния',
+        desc: 'Пройти уровень быстрее чем за 30 секунд',
+        icon: '⚡'
+    },
+
+    {
+        id: 'diff_five',
+        name: 'Перфекционист',
+        desc: 'Пройти 5 уровней',
+        icon: '💎'
+    },
+
+    {
+        id: 'diff_expert',
+        name: 'Орлиный глаз',
+        desc: 'Пройти уровень сложности «Эксперт»',
+        icon: '🦅'
+    },
+
+    {
+        id: 'diff_all',
+        name: 'Мастер различий',
+        desc: 'Пройти всю игру',
+        icon: '👑'
+    }
+
+];
+
+
+function loadDifferenceAchievementsV2() {
+
+    const saved =
+        JSON.parse(
+            localStorage.getItem(
+                'differenceAchievements'
+            ) || '[]'
+        );
+
+    return saved;
+
+}
+
+
+function unlockDifferenceAchievementV2(
+    id
+) {
+
+    const saved =
+        loadDifferenceAchievementsV2();
+
+    if (
+        saved.includes(id)
+    ) {
+        return;
+    }
+
+    saved.push(id);
+
+    localStorage.setItem(
+        'differenceAchievements',
+        JSON.stringify(saved)
+    );
+
+    const achievement =
+        differenceAchievements.find(
+            item =>
+                item.id === id
+        );
+
+    if (achievement) {
+
+        showDifferenceAchievementPopupV2(
+            achievement
+        );
+
+    }
+
+}
+
+
+function checkDifferenceAchievementsV2() {
+
+    const completed =
+        Number(
+            localStorage.getItem(
+                'diffCompleted'
+            ) || 0
+        );
+
+    if (completed >= 1) {
+
+        unlockDifferenceAchievementV2(
+            'diff_first'
+        );
+
+    }
+
+    if (
+        diffGame.lives ===
+        (
+            differenceLevels[
+                diffGame.level
+            ].difficulty === 'easy'
+                ? 4
+                : 3
+        )
+    ) {
+
+        unlockDifferenceAchievementV2(
+            'diff_no_mistakes'
+        );
+
+    }
+
+    if (
+        diffGame.bestCombo >= 5
+    ) {
+
+        unlockDifferenceAchievementV2(
+            'diff_combo5'
+        );
+
+    }
+
+    if (
+        diffGame.timeLeft >= 60
+    ) {
+
+        unlockDifferenceAchievementV2(
+            'diff_speed'
+        );
+
+    }
+
+    if (completed >= 5) {
+
+        unlockDifferenceAchievementV2(
+            'diff_five'
+        );
+
+    }
+
+    if (
+        differenceLevels[
+            diffGame.level
+        ].difficulty === 'expert'
+    ) {
+
+        unlockDifferenceAchievementV2(
+            'diff_expert'
+        );
+
+    }
+
+    if (
+        diffGame.level ===
+        differenceLevels.length - 1
+    ) {
+
+        unlockDifferenceAchievementV2(
+            'diff_all'
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// Popup достижения
+// =========================================================
+
+function showDifferenceAchievementPopupV2(
+    achievement
+) {
+
+    const popup =
+        document.createElement(
+            'div'
+        );
+
+    popup.className =
+        'difference-achievement-popup';
+
+    popup.innerHTML =
+        `
+        <div class="difference-achievement-card">
+
+            <div class="difference-achievement-glow"></div>
+
+            <div class="difference-achievement-icon">
+                ${achievement.icon}
+            </div>
+
+            <div class="difference-achievement-label">
+                ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО
+            </div>
+
+            <h3>
+                ${achievement.name}
+            </h3>
+
+            <p>
+                ${achievement.desc}
+            </p>
+
+            <button>
+                Красиво ❤️
+            </button>
+
+        </div>
+        `;
+
+    document.body.appendChild(
+        popup
+    );
+
+    const close =
+        () => {
+
+            popup.classList.remove(
+                'show'
+            );
+
+            setTimeout(
+                () => popup.remove(),
+                300
+            );
+
+        };
+
+    popup
+        .querySelector('button')
+        .onclick = close;
+
+    popup.onclick = event => {
+
+        if (
+            event.target === popup
+        ) {
+            close();
+        }
+
+    };
+
+    requestAnimationFrame(
+        () =>
+            popup.classList.add(
+                'show'
+            )
+    );
+
+    setTimeout(
+        close,
+        6000
+    );
+
+}
+
+
+// =========================================================
+// Запуск при открытии вкладки
+// =========================================================
+
+let differenceTabInitialized =
+    false;
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        const tab =
+            document.querySelector(
+                '.tab-btn[data-tab="differences"]'
+            );
+
+        if (!tab) return;
+
+        tab.addEventListener(
+            'click',
+            () => {
+
+                if (
+                    differenceTabInitialized
+                ) {
+                    return;
+                }
+
+                setTimeout(
+                    () => {
+
+                        initDifferencesGameV2();
+
+                        differenceTabInitialized =
+                            true;
+
+                    },
+                    50
+                );
+
+            }
+        );
+
+    }
+);
