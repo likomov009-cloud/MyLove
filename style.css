@@ -1921,3 +1921,492 @@ canvas {
     }
 
 }
+/* =========================================================
+   💌 ПРОГРЕСС ФРАЗ
+   ========================================================= */
+
+   .phrase-progress {
+    margin: 14px auto 4px;
+    padding: 8px 16px;
+
+    width: fit-content;
+
+    border-radius: 999px;
+
+    background: rgba(255, 220, 225, 0.55);
+
+    color: #a65b68;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
+
+    box-shadow:
+        0 4px 14px rgba(180, 90, 110, 0.08);
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease;
+}
+
+.phrase-progress:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 210, 220, 0.75);
+}
+
+.phrase-pop {
+    animation: phrasePop 0.45s ease;
+}
+
+@keyframes phrasePop {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+/* =========================================================
+   🔎 FIND THE DIFFERENCE — ПОДСКАЗКА
+   ========================================================= */
+
+   .diff-hint-marker {
+    position: absolute;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.65);
+
+    border: 4px solid #ff5d7d;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 93, 125, 0.08) 55%,
+            rgba(255, 93, 125, 0) 70%
+        );
+
+    box-shadow:
+        0 0 10px rgba(255, 93, 125, 0.9),
+        0 0 25px rgba(255, 93, 125, 0.65),
+        0 0 45px rgba(255, 93, 125, 0.35);
+
+    pointer-events: none;
+
+    z-index: 50;
+
+    animation:
+        diffHintPulse 0.75s ease-in-out infinite alternate;
+
+    opacity: 1;
+
+    transition:
+        opacity 0.35s ease,
+        transform 0.35s ease;
+}
+
+.diff-hint-marker.hide {
+    opacity: 0;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1.25);
+}
+
+.diff-hint-label {
+    position: absolute;
+
+    left: 50%;
+    bottom: calc(100% + 10px);
+
+    transform: translateX(-50%);
+
+    padding: 6px 11px;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.96);
+
+    color: #b83d59;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    white-space: nowrap;
+
+    box-shadow:
+        0 5px 18px rgba(80, 30, 40, 0.18);
+
+    pointer-events: none;
+}
+
+@keyframes diffHintPulse {
+
+    from {
+        transform:
+            translate(-50%, -50%)
+            scale(0.9);
+    }
+
+    to {
+        transform:
+            translate(-50%, -50%)
+            scale(1.08);
+    }
+}
+/* =========================================================
+   ✨ АНИМАЦИЯ НАЙДЕННОГО ОТЛИЧИЯ
+   ========================================================= */
+
+.difference-found-animation {
+    position: absolute;
+
+    width: 26px;
+    height: 26px;
+
+    border-radius: 50%;
+
+    border: 3px solid rgba(255, 92, 126, 0.95);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.95) 0%,
+            rgba(255, 180, 200, 0.55) 25%,
+            rgba(255, 92, 126, 0.18) 55%,
+            rgba(255, 92, 126, 0) 75%
+        );
+
+    box-shadow:
+        0 0 8px rgba(255, 92, 126, 0.95),
+        0 0 20px rgba(255, 92, 126, 0.75),
+        0 0 42px rgba(255, 92, 126, 0.4);
+
+    pointer-events: none;
+
+    z-index: 100;
+
+    opacity: 0;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.35);
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.65s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+
+/* Основное появление */
+.difference-found-animation.show {
+    opacity: 1;
+
+    transform:
+        translate(-50%, -50%)
+        scale(2.8);
+}
+
+
+/* Внешнее светящееся кольцо */
+.difference-found-animation::before {
+    content: '';
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 100%;
+    height: 100%;
+
+    border-radius: 50%;
+
+    border: 2px solid rgba(255, 125, 155, 0.75);
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.7);
+
+    opacity: 0;
+
+    animation:
+        differenceFoundRing 0.8s ease-out forwards;
+}
+
+
+/* Вспышка в центре */
+.difference-found-animation::after {
+    content: '✦';
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0);
+
+    color: white;
+
+    font-size: 18px;
+    font-weight: 900;
+
+    text-shadow:
+        0 0 5px rgba(255, 80, 120, 1),
+        0 0 15px rgba(255, 80, 120, 0.9);
+
+    animation:
+        differenceFoundSpark 0.65s ease-out forwards;
+}
+
+
+/* Кольцо расширяется */
+@keyframes differenceFoundRing {
+
+    0% {
+        opacity: 0.95;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.6);
+    }
+
+    70% {
+        opacity: 0.5;
+
+        transform:
+            translate(-50%, -50%)
+            scale(2.1);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(3.1);
+    }
+}
+
+
+/* Звёздочка вылетает */
+@keyframes differenceFoundSpark {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0)
+            rotate(-45deg);
+    }
+
+    25% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%)
+            scale(1.4)
+            rotate(0deg);
+    }
+
+    70% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%)
+            scale(1)
+            rotate(20deg);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.6)
+            rotate(45deg);
+    }
+}
+/* =========================================================
+   💔 АНИМАЦИЯ НЕПРАВИЛЬНОГО КЛИКА
+   ========================================================= */
+
+   .difference-wrong-effect {
+    position: absolute;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    border: 3px solid rgba(220, 70, 90, 0.95);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(255, 120, 140, 0.35) 28%,
+            rgba(220, 70, 90, 0.12) 58%,
+            rgba(220, 70, 90, 0) 75%
+        );
+
+    box-shadow:
+        0 0 8px rgba(220, 70, 90, 0.9),
+        0 0 20px rgba(220, 70, 90, 0.65),
+        0 0 38px rgba(220, 70, 90, 0.35);
+
+    pointer-events: none;
+
+    z-index: 100;
+
+    opacity: 0;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.4);
+
+    transition:
+        opacity 0.12s ease,
+        transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+
+/* Появление */
+.difference-wrong-effect.show {
+    opacity: 1;
+
+    transform:
+        translate(-50%, -50%)
+        scale(1.9);
+}
+
+
+/* ✖ в центре */
+.difference-wrong-effect::before {
+    content: '×';
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0);
+
+    color: white;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    line-height: 1;
+
+    text-shadow:
+        0 0 6px rgba(180, 40, 60, 1),
+        0 0 15px rgba(220, 70, 90, 0.9);
+
+    animation:
+        wrongDifferenceCross 0.5s ease-out forwards;
+}
+
+
+/* Расходящееся кольцо */
+.difference-wrong-effect::after {
+    content: '';
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 100%;
+    height: 100%;
+
+    border-radius: 50%;
+
+    border: 2px solid rgba(240, 90, 110, 0.7);
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.6);
+
+    animation:
+        wrongDifferenceRing 0.6s ease-out forwards;
+}
+
+
+/* ✖ появляется */
+@keyframes wrongDifferenceCross {
+
+    0% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.2)
+            rotate(-20deg);
+    }
+
+    35% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%)
+            scale(1.25)
+            rotate(0deg);
+    }
+
+    70% {
+        opacity: 1;
+
+        transform:
+            translate(-50%, -50%)
+            scale(1)
+            rotate(8deg);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.8)
+            rotate(15deg);
+    }
+}
+
+
+/* Кольцо разлетается */
+@keyframes wrongDifferenceRing {
+
+    0% {
+        opacity: 0.8;
+
+        transform:
+            translate(-50%, -50%)
+            scale(0.6);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            translate(-50%, -50%)
+            scale(2.8);
+    }
+}

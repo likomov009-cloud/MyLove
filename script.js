@@ -204,7 +204,104 @@ const phrasesList = [
     "Маленькая, ты - моя вселенная.",
     "Моя маленькая девочка, береги себя для меня.",
     "Радость моя, я всегда думаю о тебе.",
-    "Родная, ты - моё вдохновение."
+    "Родная, ты - моё вдохновение.",
+    "Я до сих пор иногда смотрю натебя и думаю: нихера себе, это правда моя жена.❤️",
+
+    "Мы умудрились пожениться два раза. Видимо, одной свадьбы нам оказалось мало.❤️",
+
+    "Русская свадьба была, дагестанская свадьба была. Теперь осталось просто всю жизнь быть счастливыми. ❤️",
+
+    "Если бы мне снова предложили выбрать себе жену — я бы даже думать не стал.",
+
+    "Мне нравится говорить «моя жена». Особенно когда речь идёт именно о тебе.❤️",
+
+    "Ты — мой любимый человек, с которым я хочу прожить все самые обычные и самые безумные дни.",
+
+    "Хочу однажды состариться рядом с тобой и всё ещё продолжать тебя подкалывать.❤️",
+
+    "Ты у меня официально самая любимая. Документы имеются. Печати имеются. Отмазаться не получится.❤️",
+
+    "Мне нравится наша маленькая семья. И я хочу, чтобы она становилась только счастливее.",
+
+    "Я хочу ещё тысячу наших фотографий, сотню поездок и миллион воспоминаний.",
+
+    "Когда-нибудь мы будем сидеть вместе и смеяться над тем, какими молодыми и глупыми были.",
+
+    "А потом я снова посмотрю на тебя и пойму, что ничего бы в своей жизни не поменял.❤️",
+
+    "Ты — та самая, с которой хочется не только путешествовать, но и просто вместе покупать продукты. ❤️",
+
+    "Мне нравится наше «мы». Оно получилось лучше, чем я когда-либо мог представить.",
+
+    "Если жизнь — это длинный путь, я очень рад, что прохожу его именно с тобой.",
+
+    "Ты моя жена, мой любимый человек и главный получатель всех моих тупых шуток. 😂",
+
+    "Спасибо, что любишь меня даже тогда, когда я несу какую-нибудь хуйню. 😂❤️",
+
+    "Я хочу, чтобы у нас было столько совместных воспоминаний, что нам не хватало бы вечера, чтобы всё вспомнить.",
+
+    "Мне хочется ещё много раз говорить тебе: «Помнишь, как мы тогда…»",
+
+    "Ты — моя любимая причина строить планы на будущее.",
+
+    "Я хочу просыпаться рядом с тобой ещё много-много лет и каждый раз радоваться, что именно ты лежишь рядом.",
+
+    "Мне нравится твоя улыбка. Особенно когда я знаю, что сам её вызвал.",
+
+    "Ты можешь просто сидеть рядом — и мой день уже становится лучше.",
+
+    "Моя любимая жена — звучит охуенно. ❤️",
+
+    "Я выбрал тебя однажды и продолжаю выбирать тебя каждый день.",
+
+    "Две свадьбы — это уже серьёзно. Теперь давай хотя бы одну жизнь вместе. 😂",
+
+    "Мне кажется, после двух свадеб нам уже просто нельзя друг от друга сбегать. 😂",
+
+    "Ты — мой человек. Без дополнительных условий и с пожизненной гарантией. ❤️",
+
+    "Я хочу с тобой не идеальную жизнь. Я хочу именно нашу жизнь.",
+
+    "Хочу вместе с тобой увидеть ещё много городов, стран, морей и красивых мест.",
+
+    "А потом вернуться домой и сказать: «Ну что, куда едем дальше?» 😂",
+
+    "Ты — моя любимая часть любого путешествия.",
+
+    "Самые дорогие для меня воспоминания почему-то почти всегда связаны с тобой.",
+
+    "Я хочу, чтобы через двадцать лет у нас было в двадцать раз больше историй, чем сейчас.",
+
+    "Мне нравится думать о нашем будущем. Потому что в нём есть ты.",
+
+    "Если бы можно было прожить нашу историю ещё раз — я бы снова пошёл тем же маршрутом.",
+
+    "Спасибо за каждый наш день. Даже за те дни, когда мы оба немного ебанулись. 😂",
+
+    "С тобой можно и серьёзно поговорить, и поржать с какой-нибудь абсолютной хуйни. За это я тебя особенно люблю.",
+
+    "Ты — человек, которому я первым хочу рассказать какую-нибудь ерунду, которая вообще никому больше не интересна. 😂",
+
+    "Я люблю наши маленькие семейные традиции, даже если некоторые из них мы сами придумали пять минут назад.",
+
+    "Мне нравится, что у нас теперь есть столько общего прошлого и ещё больше общего будущего.",
+
+    "Ты — моя семья. И это для меня намного больше, чем просто слово.",
+
+    "Я хочу однажды посмотреть на тебя в старости и подумать: «Вот же мне повезло».",
+
+    "Ты моя любимая девочка. Просто теперь ещё и жена. 💍❤️",
+
+    "Если мне дадут ещё одну жизнь — я опять постараюсь найти тебя.",
+
+    "Мне хочется собирать с тобой не только фотографии, но и целую жизнь.",
+
+    "Ты — моя самая любимая причина возвращаться домой.",
+
+    "Я люблю тебя за всё то, что делает тебя именно тобой.",
+
+    "Моя жена, мой человек, моя любовь. И да — я всё ещё от тебя без ума. ❤️"
 ];
 
 // ---------- FIREBASE СИНХРОНИЗАЦИЯ СЕРДЕЧЕК И РЕКОРДА ----------
@@ -298,8 +395,47 @@ function updateRandomPhrase() {
         phrase = getRandomPhrase();
     }
     phraseText.textContent = phrase;
+    registerPhraseOpened(phrase);
+}
+// ---------- ПРОГРЕСС ОТКРЫТЫХ ФРАЗ ----------
+
+let openedPhrases = JSON.parse(
+    localStorage.getItem('openedPhrases') || '[]'
+);
+
+function registerPhraseOpened(phrase) {
+
+    if (!phrase) return;
+
+    if (!openedPhrases.includes(phrase)) {
+
+        openedPhrases.push(phrase);
+
+        localStorage.setItem(
+            'openedPhrases',
+            JSON.stringify(openedPhrases)
+        );
+
+        updatePhraseProgress();
+
+        checkPhraseAchievements();
+    }
 }
 
+function getTotalPhraseCount() {
+    return phrasesList.length + brotherPhrases.length;
+}
+
+function updatePhraseProgress() {
+
+    const progress =
+        document.getElementById('phraseProgress');
+
+    if (!progress) return;
+
+    progress.textContent =
+        `💌 Открыто фраз: ${openedPhrases.length} / ${getTotalPhraseCount()}`;
+}
 
 // ---------- УВЕДОМЛЕНИЯ ----------
 let notificationTimers = [];
@@ -779,7 +915,13 @@ const achievements = [
     { id: 6, name: 'Легенда', desc: 'Собрать 2500 сердечек', target: 2500, icon: '🏆', unlocked: false },
     { id: 7, name: 'Королева', desc: 'Собрать 5000 сердечек', target: 5000, icon: '👸', unlocked: false },
     { id: 8, name: 'Императрица', desc: 'Собрать 10000 сердечек', target: 10000, icon: '👑', unlocked: false },
-    { id: 9, name: 'Маленькая, любимая жена', desc: 'Собрать 50000 сердечек', target: 50000, icon: '👰‍♀️', unlocked: false }
+    { id: 9, name: 'Маленькая, любимая жена', desc: 'Собрать 50000 сердечек', target: 50000, icon: '👰‍♀️', unlocked: false },
+
+    // 💌 Достижения за фразы
+    { id: 101, name: 'Первое послание', desc: 'Открыть 1 уникальную фразу', target: 1, icon: '💌', type: 'phrases', unlocked: false },
+    { id: 102, name: 'Поток любви', desc: 'Открыть 10 уникальных фраз', target: 10, icon: '💕', type: 'phrases', unlocked: false },
+    { id: 103, name: 'Семейный архив', desc: 'Открыть 25 уникальных фраз', target: 25, icon: '💍', type: 'phrases', unlocked: false },
+    { id: 104, name: 'Всё прочитано', desc: 'Открыть 50 уникальных фраз', target: 50, icon: '❤️', type: 'phrases', unlocked: false }
 ];
 function loadAchievements() {
     const saved = localStorage.getItem('achievements');
@@ -837,6 +979,37 @@ function checkAchievements(currentTotal) {
             setTimeout(() => {
                 showAchievementPopup(ach);
             }, 150);
+        }
+    });
+
+    if (newUnlock) {
+        saveAchievements();
+        renderAchievements();
+    }
+}
+function checkPhraseAchievements() {
+
+    const totalOpened = openedPhrases.length;
+
+    let newUnlock = false;
+
+    achievements.forEach(ach => {
+
+        if (
+            ach.type === 'phrases' &&
+            !ach.unlocked &&
+            totalOpened >= ach.target
+        ) {
+
+            ach.unlocked = true;
+
+            newUnlock = true;
+
+            setTimeout(() => {
+                alert(
+                    `🏆 Новое достижение: ${ach.name}!\n${ach.desc}`
+                );
+            }, 100);
         }
     });
 
@@ -2093,7 +2266,65 @@ function drawDiffImagesV2() {
         }
     );
 }
+// =========================================================
+// Маркер найденного отличия
+// =========================================================
 
+function drawFoundDifferenceMarker(
+    ctx,
+    difference,
+    width,
+    height
+) {
+    const x =
+        difference.x * width;
+
+    const y =
+        difference.y * height;
+
+    const radius =
+        difference.radius;
+
+    ctx.save();
+
+    // Полупрозрачный круг вокруг найденного отличия
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.strokeStyle =
+        'rgba(255, 80, 120, 0.95)';
+
+    ctx.lineWidth = 4;
+
+    ctx.stroke();
+
+    // Внешнее свечение
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        radius + 5,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.strokeStyle =
+        'rgba(255, 120, 160, 0.45)';
+
+    ctx.lineWidth = 2;
+
+    ctx.stroke();
+
+    ctx.restore();
+}
 
 // =========================================================
 // Реальные визуальные изменения
@@ -2432,6 +2663,8 @@ function handleDiffClickV2(
 
     const y =
         (event.clientY - rect.top) / rect.height;
+    canvas.dataset.lastClickX = x;
+    canvas.dataset.lastClickY = y;
 
     console.log(
         'КЛИК:',
@@ -2557,7 +2790,7 @@ function foundDifferenceV2(index) {
             : `✨ Отличие найдено  +${points}`,
         true
     );
-
+    animateFoundDifferenceV2(index);
     drawDiffImagesV2();
 
     updateDiffUIV2();
@@ -2572,7 +2805,56 @@ function foundDifferenceV2(index) {
     }
 
 }
+// =========================================================
+// Анимация найденного отличия
+// =========================================================
 
+function animateFoundDifferenceV2(index) {
+    const difference = diffGame.differenceRegions.find(
+        d => d.index === index
+    );
+
+    if (!difference) return;
+
+    const canvases = [
+        diffGame.leftCanvas,
+        diffGame.rightCanvas
+    ];
+
+    canvases.forEach(canvas => {
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+
+        const x =
+            difference.x * rect.width;
+
+        const y =
+            difference.y * rect.height;
+
+        const marker = document.createElement('div');
+
+        marker.className = 'difference-found-animation';
+
+        marker.style.left = `${x}px`;
+        marker.style.top = `${y}px`;
+
+        canvas.parentElement.appendChild(marker);
+
+        requestAnimationFrame(() => {
+            marker.classList.add('show');
+        });
+
+        setTimeout(() => {
+            marker.classList.remove('show');
+
+            setTimeout(() => {
+                marker.remove();
+            }, 350);
+
+        }, 850);
+    });
+}
 
 // =========================================================
 // Ошибка
@@ -2599,6 +2881,7 @@ function wrongDifferenceV2(canvas) {
     canvas.classList.add(
         'difference-mistake'
     );
+    animateWrongDifferenceV2(canvas);
 
     showDiffFeedbackV2(
         '💔 Не здесь — серия сбита',
@@ -2616,7 +2899,82 @@ function wrongDifferenceV2(canvas) {
     }
 
 }
+// =========================================================
+// ✖️ Анимация неправильного клика
+// =========================================================
 
+function animateWrongDifferenceV2(canvas) {
+
+    if (!canvas) return;
+
+    const wrapper =
+        canvas.parentElement;
+
+    if (!wrapper) return;
+
+    // Удаляем старый эффект, если пользователь
+    // очень быстро нажал несколько раз
+    const oldEffect =
+        wrapper.querySelector(
+            '.difference-wrong-effect'
+        );
+
+    if (oldEffect) {
+        oldEffect.remove();
+    }
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const effect =
+        document.createElement('div');
+
+    effect.className =
+        'difference-wrong-effect';
+
+    // Ставим эффект в центр места клика,
+    // которое сохраняем отдельно
+    const x =
+        canvas.dataset.lastClickX;
+
+    const y =
+        canvas.dataset.lastClickY;
+
+    if (
+        x !== undefined &&
+        y !== undefined
+    ) {
+        effect.style.left =
+            `${Number(x) * rect.width}px`;
+
+        effect.style.top =
+            `${Number(y) * rect.height}px`;
+    } else {
+        // Если координаты недоступны —
+        // показываем эффект по центру
+        effect.style.left =
+            `${rect.width / 2}px`;
+
+        effect.style.top =
+            `${rect.height / 2}px`;
+    }
+
+    wrapper.appendChild(effect);
+
+    requestAnimationFrame(() => {
+        effect.classList.add('show');
+    });
+
+    setTimeout(() => {
+
+        effect.classList.remove('show');
+
+        setTimeout(() => {
+            effect.remove();
+        }, 300);
+
+    }, 650);
+}
 
 // =========================================================
 // Подсказка
@@ -2670,79 +3028,84 @@ function useDiffHintV2() {
 // Умная подсветка подсказки
 // =========================================================
 
-function flashDifferenceHintV2(
-    difference
-) {
+function flashDifferenceHintV2(difference) {
 
-    const canvas =
-        diffGame.rightCanvas;
+    const canvas = diffGame.rightCanvas;
 
-    const ctx =
-        diffGame.rightCtx;
+    if (!canvas || !difference) return;
+
+    const wrapper =
+        canvas.parentElement;
+
+    if (!wrapper) return;
+
+    // Контейнер должен позволять разместить маркер поверх canvas
+    if (getComputedStyle(wrapper).position === 'static') {
+        wrapper.style.position = 'relative';
+    }
+
+    // Удаляем старую подсказку
+    const oldHint =
+        wrapper.querySelector('.diff-hint-marker');
+
+    if (oldHint) {
+        oldHint.remove();
+    }
+
+    const marker =
+        document.createElement('div');
+
+    marker.className =
+        'diff-hint-marker';
 
     const x =
-        difference.x *
-        canvas.width;
+        difference.x * canvas.clientWidth;
 
     const y =
-        difference.y *
-        canvas.height;
+        difference.y * canvas.clientHeight;
 
-    let frame = 0;
+    const size =
+        Math.max(
+            34,
+            difference.radius * 3.4
+        );
 
-    const interval =
-        setInterval(() => {
+    marker.style.width =
+        `${size}px`;
 
-            drawDiffImagesV2();
+    marker.style.height =
+        `${size}px`;
 
-            ctx.save();
+    marker.style.left =
+        `${x}px`;
 
-            const pulse =
-                1 +
-                Math.sin(
-                    frame * 0.5
-                ) * 0.2;
+    marker.style.top =
+        `${y}px`;
 
-            ctx.strokeStyle =
-                `rgba(255,255,255,${0.9 - frame / 30})`;
+    wrapper.appendChild(marker);
 
-            ctx.lineWidth = 4;
+    // Небольшая подпись
+    const label =
+        document.createElement('div');
 
-            ctx.shadowColor =
-                '#ff5d7d';
+    label.className =
+        'diff-hint-label';
 
-            ctx.shadowBlur = 25;
+    label.textContent =
+        '🔎 Здесь!';
 
-            ctx.beginPath();
+    marker.appendChild(label);
 
-            ctx.arc(
-                x,
-                y,
-                difference.radius *
-                1.7 *
-                pulse,
-                0,
-                Math.PI * 2
-            );
+    // Подсказка живёт примерно 2 секунды
+    setTimeout(() => {
 
-            ctx.stroke();
+        marker.classList.add('hide');
 
-            ctx.restore();
+        setTimeout(() => {
+            marker.remove();
+        }, 350);
 
-            frame++;
-
-            if (frame >= 18) {
-
-                clearInterval(
-                    interval
-                );
-
-                drawDiffImagesV2();
-
-            }
-
-        }, 90);
-
+    }, 2200);
 }
 
 
@@ -2819,24 +3182,21 @@ function finishDiffLevelV2() {
     diffGame.score =
         finalScore;
 
-    const unlocked =
-        Number(
-            localStorage.getItem(
-                'diffUnlocked'
-            ) || 1
+        const nextUnlockedLevel = Math.min(
+            diffGame.level + 2,
+            differenceLevels.length
         );
-
-    if (
-        diffGame.level + 2 >
-        unlocked
-    ) {
-
-        localStorage.setItem(
-            'diffUnlocked',
-            diffGame.level + 2
+        
+        const currentUnlockedLevel = Number(
+            localStorage.getItem('diffUnlocked') || 1
         );
-
-    }
+        
+        if (nextUnlockedLevel > currentUnlockedLevel) {
+            localStorage.setItem(
+                'diffUnlocked',
+                nextUnlockedLevel
+            );
+        }
 
     saveDiffStatsV2();
 
@@ -2904,7 +3264,7 @@ function finishDiffLevelV2() {
     );
 
     renderDiffLevelsV2();
-
+    updateDiffUIV2();
     checkDifferenceAchievementsV2();
 }
 
