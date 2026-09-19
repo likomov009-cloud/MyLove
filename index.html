@@ -32,6 +32,8 @@
         <button class="tab-btn" data-tab="game">Игра</button>
         <button class="tab-btn" data-tab="differences">🔎 Найди различия</button>
         <button class="tab-btn" data-tab="platformer">Прыг-скок</button>
+        <button class="tab-btn" data-tab="catch">💫 Лови моменты</button>
+        <button class="tab-btn" data-tab="flow">🧠 Поток</button>
         <button class="tab-btn" data-tab="achievements">🏆 Достижения</button>
     </nav>
 
@@ -51,6 +53,8 @@
                 Здесь всегда есть немного тепла,
                 немного меня и очень много любви.
             </p>
+
+            <div class="home-greeting" id="homeGreeting"></div>
         </section>
     
         <section class="home-quick-card">
@@ -99,6 +103,18 @@
             <button class="home-menu-card" data-open-tab="platformer">
                 <span class="home-menu-icon">🎮</span>
                 <span class="home-menu-title">Прыг-скок</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="catch">
+                <span class="home-menu-icon">💫</span>
+                <span class="home-menu-title">Лови моменты</span>
+                <span class="home-menu-arrow">→</span>
+            </button>
+    
+            <button class="home-menu-card" data-open-tab="flow">
+                <span class="home-menu-icon">🧠</span>
+                <span class="home-menu-title">Поток</span>
                 <span class="home-menu-arrow">→</span>
             </button>
     
@@ -396,6 +412,165 @@
 
 </div>
 
+    <!-- Платформер -->
+<div class="tab-content" id="platformer">
+    <div class="platformer-container">
+        <canvas id="platformerCanvas"></canvas>
+        <div id="platformerScoreDisplay">
+            Счёт: <span id="platformerScore">0</span>
+            &nbsp; | &nbsp;
+            Рекорд: <span id="platformerHighscore">0</span>
+        </div>
+        <div id="mobileControls">
+            <button class="ctrl-btn" id="btnLeft">←</button>
+            <button class="ctrl-btn" id="btnJump">↑</button>
+            <button class="ctrl-btn" id="btnRight">→</button>
+        </div>
+        <p class="platformer-hint">Стрелки / A,D — бежать, пробел / W / ↑ — прыжок</p>
+    </div>
+</div>    
+
+<!-- Лови моменты -->
+<div class="tab-content" id="catch">
+    <div class="arcade-game">
+
+        <div class="game-head">
+            <div class="game-head-text">
+                <div class="game-kicker">БЕСКОНЕЧНАЯ АРКАДА</div>
+                <h2>💫 Лови моменты</h2>
+                <p>Собирай тёплые моменты и уворачивайся от туч и шипов ❤️</p>
+            </div>
+
+            <div class="game-record">
+                <span>РЕКОРД</span>
+                <strong id="catchBestScore">0</strong>
+            </div>
+        </div>
+
+        <div class="game-stats-bar">
+            <div class="stat-chip">
+                <span>Очки</span>
+                <strong id="catchScore">0</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Комбо</span>
+                <strong id="catchCombo">×1</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Множитель</span>
+                <strong id="catchMultiplier">×1</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Жизни</span>
+                <strong id="catchLives">❤️❤️❤️</strong>
+            </div>
+        </div>
+
+        <div class="game-stage" id="catchStage">
+            <canvas id="catchCanvas"></canvas>
+
+            <div class="game-overlay show" id="catchOverlay">
+                <div class="game-overlay-card">
+                    <div class="game-overlay-icon" id="catchOverlayIcon">💫</div>
+                    <h3 id="catchOverlayTitle">Лови моменты</h3>
+                    <p id="catchOverlayText">
+                        Управляй мышью, пальцем или стрелками.
+                        Собирай хорошее — избегай плохого.
+                    </p>
+                    <button id="catchStartBtn" class="game-btn game-btn-primary">
+                        Начать игру
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-legend">
+            <span class="legend-item">💗 ⭐ 🎁 — лови</span>
+            <span class="legend-item">🌧️ ⚡ 🌵 — избегай</span>
+            <span class="legend-item">🛡 🧲 ⏳ ✨ ❤️ — бонусы</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- Поток -->
+<div class="tab-content" id="flow">
+    <div class="arcade-game">
+
+        <div class="game-head">
+            <div class="game-head-text">
+                <div class="game-kicker">БЕСКОНЕЧНАЯ ЛОГИКА</div>
+                <h2>🧠 Поток</h2>
+                <p>Решай задачи на время, пока поток не прервётся</p>
+            </div>
+
+            <div class="game-record">
+                <span>РЕКОРД</span>
+                <strong id="flowBestScore">0</strong>
+            </div>
+        </div>
+
+        <div class="game-stats-bar">
+            <div class="stat-chip">
+                <span>Очки</span>
+                <strong id="flowScore">0</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Серия</span>
+                <strong id="flowStreak">0</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Множитель</span>
+                <strong id="flowMultiplier">×1</strong>
+            </div>
+            <div class="stat-chip">
+                <span>Уровень</span>
+                <strong id="flowLevel">1</strong>
+            </div>
+        </div>
+
+        <div class="flow-board" id="flowBoard">
+            <div class="flow-timer">
+                <div class="flow-timer-fill" id="flowTimerFill"></div>
+            </div>
+
+            <div class="flow-prompt" id="flowPrompt">
+                Нажми «Начать», чтобы погрузиться в поток
+            </div>
+
+            <div class="flow-options" id="flowOptions"></div>
+
+            <div class="game-overlay show" id="flowOverlay">
+                <div class="game-overlay-card">
+                    <div class="game-overlay-icon" id="flowOverlayIcon">🧠</div>
+                    <h3 id="flowOverlayTitle">Поток</h3>
+                    <p id="flowOverlayText">
+                        Отвечай быстро и точно. Ошибка или время вышло — минус жизнь.
+                    </p>
+                    <button id="flowStartBtn" class="game-btn game-btn-primary">
+                        Начать игру
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-legend">
+            <span class="legend-item">⏱️ Успей до конца таймера</span>
+            <span class="legend-item">🔥 Серия повышает множитель</span>
+            <span class="legend-item">❤️❤️❤️ Три ошибки — конец</span>
+        </div>
+
+    </div>
+</div>
+
+<!-- Достижения -->
+    <div class="tab-content" id="achievements">
+        <div class="achievements-container" id="achievementsList">
+            <!-- Сюда будут динамически подгружаться достижения -->
+        </div>
+    </div>
+</div>
+
 <!-- Popup окончания уровня -->
 <div
     id="diffResultPopup"
@@ -450,32 +625,6 @@
 
 </div>
 
-    <!-- Платформер -->
-<div class="tab-content" id="platformer">
-    <div class="platformer-container">
-        <canvas id="platformerCanvas"></canvas>
-        <div id="platformerScoreDisplay">
-            Счёт: <span id="platformerScore">0</span>
-            &nbsp; | &nbsp;
-            Рекорд: <span id="platformerHighscore">0</span>
-        </div>
-        <div id="mobileControls">
-            <button class="ctrl-btn" id="btnLeft">←</button>
-            <button class="ctrl-btn" id="btnJump">↑</button>
-            <button class="ctrl-btn" id="btnRight">→</button>
-        </div>
-        <p class="platformer-hint">Стрелки / A,D — бежать, пробел / W / ↑ — прыжок</p>
-    </div>
-</div>    
-
-
-<!-- Достижения -->
-    <div class="tab-content" id="achievements">
-        <div class="achievements-container" id="achievementsList">
-            <!-- Сюда будут динамически подгружаться достижения -->
-        </div>
-    </div>
-</div>
 <!-- Popup достижения -->
 <div id="achievementPopup" class="achievement-popup">
     <div class="achievement-popup-backdrop"></div>
@@ -500,6 +649,12 @@
         </button>
     </div>
 </div>
+<!-- Lightbox галереи -->
+<div id="galleryLightbox" class="lightbox" aria-hidden="true">
+    <button id="lightboxClose" class="lightbox-close" aria-label="Закрыть">×</button>
+    <img id="lightboxImage" src="" alt="Фото">
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>

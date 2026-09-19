@@ -439,10 +439,13 @@ function updatePhraseProgress() {
 
 // ---------- УВЕДОМЛЕНИЯ ----------
 let notificationTimers = [];
+function notificationsSupported() {
+    return typeof Notification !== 'undefined';
+}
 function scheduleDailyNotifications() {
     notificationTimers.forEach(timer => clearTimeout(timer));
     notificationTimers = [];
-    if (Notification.permission !== 'granted') return;
+    if (!notificationsSupported() || Notification.permission !== 'granted') return;
     const count = Math.random() < 0.5 ? 2 : 3;
     const now = new Date();
     const endOfDay = new Date(now);
@@ -458,7 +461,7 @@ function scheduleDailyNotifications() {
         if (delay > 0) {
             const timer = setTimeout(() => {
                 const phrase = getRandomPhrase();
-                new Notification('Твоя поддержка', { body: phrase, icon: '/img/icon-192.png' });
+                new Notification('Твоя поддержка', { body: phrase, icon: 'image/background.jpg' });
             }, delay);
             notificationTimers.push(timer);
         }
@@ -466,12 +469,21 @@ function scheduleDailyNotifications() {
     localStorage.setItem('notificationsScheduled', now.toDateString());
 }
 function requestNotificationPermission() {
-    if (Notification.permission === 'granted') scheduleDailyNotifications();
-    else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(perm => { if (perm === 'granted') scheduleDailyNotifications(); });
+    if (!notificationsSupported()) return Promise.resolve('unsupported');
+    if (Notification.permission === 'granted') {
+        scheduleDailyNotifications();
+        return Promise.resolve('granted');
     }
+    if (Notification.permission !== 'denied') {
+        return Notification.requestPermission().then(perm => {
+            if (perm === 'granted') scheduleDailyNotifications();
+            return perm;
+        });
+    }
+    return Promise.resolve(Notification.permission);
 }
 function checkAndScheduleNotifications() {
+    if (!notificationsSupported()) return;
     const todayStr = new Date().toDateString();
     const lastScheduled = localStorage.getItem('notificationsScheduled');
     if (lastScheduled !== todayStr && Notification.permission === 'granted') scheduleDailyNotifications();
@@ -484,9 +496,18 @@ function addNotificationButton() {
     btn.className = 'next-phrase-btn';
     btn.style.marginTop = '10px';
     btn.onclick = () => {
-        requestNotificationPermission();
-        btn.textContent = '✅ Уведомления включены';
-        btn.disabled = true;
+        requestNotificationPermission().then(perm => {
+            if (perm === 'granted') {
+                btn.textContent = '✅ Уведомления включены';
+                btn.disabled = true;
+            } else if (perm === 'denied') {
+                btn.textContent = '🔕 Уведомления отключены в браузере';
+                btn.disabled = true;
+            } else if (perm === 'unsupported') {
+                btn.textContent = '🔕 Уведомления не поддерживаются';
+                btn.disabled = true;
+            }
+        });
     };
     container.appendChild(btn);
 }
@@ -716,7 +737,7 @@ function updateScoreUI() {
     const progressFill = document.getElementById('progressFill');
     if (progressFill) progressFill.style.width = progressPercent + '%';
     const remainingSpan = document.getElementById('remainingToGoal');
-    if (remainingSpan) remainingSpan.textContent = (Math.ceil(totalHearts / goal) * goal) - totalHearts;
+    if (remainingSpan) remainingSpan.textContent = ((Math.floor(totalHearts / goal) + 1) * goal) - totalHearts;
     const goalSpan = document.getElementById('goalValue');
     if (goalSpan) goalSpan.textContent = goal;
 }
@@ -921,8 +942,34 @@ const achievements = [
     { id: 101, name: 'Первое послание', desc: 'Открыть 1 уникальную фразу', target: 1, icon: '💌', type: 'phrases', unlocked: false },
     { id: 102, name: 'Поток любви', desc: 'Открыть 10 уникальных фраз', target: 10, icon: '💕', type: 'phrases', unlocked: false },
     { id: 103, name: 'Семейный архив', desc: 'Открыть 25 уникальных фраз', target: 25, icon: '💍', type: 'phrases', unlocked: false },
-    { id: 104, name: 'Всё прочитано', desc: 'Открыть 50 уникальных фраз', target: 50, icon: '❤️', type: 'phrases', unlocked: false }
+    { id: 104, name: 'Всё прочитано', desc: 'Открыть 50 уникальных фраз', target: 50, icon: '❤️', type: 'phrases', unlocked: false },
+
+    // 💫 Достижения «Лови моменты»
+    { id: 201, name: 'Первый момент', desc: 'Поймать первый момент', icon: '💫', type: 'catch', unlocked: false },
+    { id: 202, name: 'В ударе', desc: 'Собрать комбо ×10', icon: '🔥', type: 'catch', unlocked: false },
+    { id: 203, name: 'Коллекционер бонусов', desc: 'Собрать 5 бонусов за одну игру', icon: '🧲', type: 'catch', unlocked: false },
+    { id: 204, name: 'Стойкий', desc: 'Продержаться 60 секунд', icon: '⏱️', type: 'catch', unlocked: false },
+    { id: 205, name: 'Мастер момента', desc: 'Набрать 3000 очков', icon: '🏆', type: 'catch', unlocked: false },
+
+    // 🧠 Достижения «Поток»
+    { id: 301, name: 'Первая мысль', desc: 'Решить первую задачу', icon: '🧠', type: 'flow', unlocked: false },
+    { id: 302, name: 'В потоке', desc: 'Серия из 10 верных ответов', icon: '🌊', type: 'flow', unlocked: false },
+    { id: 303, name: 'Молниеносно', desc: 'Ответить быстрее чем за 1 секунду', icon: '⚡', type: 'flow', unlocked: false },
+    { id: 304, name: 'Десятый уровень', desc: 'Достичь 10 уровня', icon: '📈', type: 'flow', unlocked: false },
+    { id: 305, name: 'Мудрость', desc: 'Набрать 2000 очков', icon: '👑', type: 'flow', unlocked: false }
 ];
+
+// Категории достижений для группировки в интерфейсе
+const achievementCategories = [
+    { key: 'hearts', title: '❤️ Сердечки' },
+    { key: 'phrases', title: '💌 Фразы' },
+    { key: 'catch', title: '💫 Лови моменты' },
+    { key: 'flow', title: '🧠 Поток' }
+];
+
+function achievementCategory(ach) {
+    return ach.type || 'hearts';
+}
 function loadAchievements() {
     const saved = localStorage.getItem('achievements');
     if (saved) {
@@ -972,7 +1019,9 @@ function checkAchievements(currentTotal) {
     let newUnlock = false;
 
     achievements.forEach(ach => {
-        if (!ach.unlocked && currentTotal >= ach.target) {
+        // Только «сердечные» достижения (без type)
+        if (ach.type) return;
+        if (!ach.unlocked && typeof ach.target === 'number' && currentTotal >= ach.target) {
             ach.unlocked = true;
             newUnlock = true;
 
@@ -987,6 +1036,18 @@ function checkAchievements(currentTotal) {
         renderAchievements();
     }
 }
+
+// Универсальная разблокировка достижения по id
+function unlockAchievementById(id) {
+    const ach = achievements.find(a => a.id === id);
+    if (!ach || ach.unlocked) return false;
+    ach.unlocked = true;
+    saveAchievements();
+    renderAchievements();
+    setTimeout(() => showAchievementPopup(ach), 150);
+    return true;
+}
+
 function checkPhraseAchievements() {
 
     const totalOpened = openedPhrases.length;
@@ -1006,9 +1067,7 @@ function checkPhraseAchievements() {
             newUnlock = true;
 
             setTimeout(() => {
-                alert(
-                    `🏆 Новое достижение: ${ach.name}!\n${ach.desc}`
-                );
+                showAchievementPopup(ach);
             }, 100);
         }
     });
@@ -1018,22 +1077,72 @@ function checkPhraseAchievements() {
         renderAchievements();
     }
 }
+
+// Значение прогресса для отображения в списке достижений
+function achievementProgressValue(ach) {
+    if (ach.unlocked) return null;
+    if (typeof ach.target !== 'number') return null;
+    if (!ach.type) return totalHearts;
+    if (ach.type === 'phrases') return openedPhrases.length;
+    return null;
+}
+
 function renderAchievements() {
     const container = document.getElementById('achievementsList');
     if (!container) return;
     container.innerHTML = '';
-    achievements.forEach(ach => {
-        const card = document.createElement('div');
-        card.className = `achievement-card ${ach.unlocked ? '' : 'locked'}`;
-        card.innerHTML = `
-            <div class="achievement-icon">${ach.icon}</div>
-            <div class="achievement-info">
-                <div class="achievement-title">${ach.name}</div>
-                <div class="achievement-desc">${ach.desc}</div>
-            </div>
-            <div class="achievement-progress">${ach.unlocked ? '✅' : `🔒 ${ach.target}`}</div>
-        `;
-        container.appendChild(card);
+
+    achievementCategories.forEach(category => {
+        const list = achievements.filter(ach => achievementCategory(ach) === category.key);
+        if (!list.length) return;
+
+        const group = document.createElement('div');
+        group.className = 'achievement-group';
+
+        const title = document.createElement('div');
+        title.className = 'achievement-group-title';
+        title.textContent = category.title;
+        group.appendChild(title);
+
+        list.forEach(ach => {
+            const card = document.createElement('div');
+            card.className = `achievement-card ${ach.unlocked ? '' : 'locked'}`;
+
+            const progressValue = achievementProgressValue(ach);
+            let progressHtml;
+
+            if (ach.unlocked) {
+                progressHtml = '✅';
+            } else if (progressValue !== null) {
+                const percent = Math.min(100, Math.round((progressValue / ach.target) * 100));
+                progressHtml = `${progressValue}/${ach.target}`;
+                card.innerHTML = `
+                    <div class="achievement-icon">${ach.icon}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-title">${ach.name}</div>
+                        <div class="achievement-desc">${ach.desc}</div>
+                        <div class="achievement-bar"><div class="achievement-bar-fill" style="width:${percent}%"></div></div>
+                    </div>
+                    <div class="achievement-progress">${progressHtml}</div>
+                `;
+                group.appendChild(card);
+                return;
+            } else {
+                progressHtml = '🔒';
+            }
+
+            card.innerHTML = `
+                <div class="achievement-icon">${ach.icon}</div>
+                <div class="achievement-info">
+                    <div class="achievement-title">${ach.name}</div>
+                    <div class="achievement-desc">${ach.desc}</div>
+                </div>
+                <div class="achievement-progress">${progressHtml}</div>
+            `;
+            group.appendChild(card);
+        });
+
+        container.appendChild(group);
     });
 }
 
@@ -1694,6 +1803,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(tabId).classList.add('active');
 
             if (tabId !== 'platformer') stopPlatformer();
+            if (tabId !== 'catch') stopCatchGame();
+            if (tabId !== 'flow') stopFlowGame();
 
             if (tabId === 'phrases') updateRandomPhrase();
             if (tabId === 'game') {
@@ -1702,10 +1813,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (tabId === 'achievements') renderAchievements();
             if (tabId === 'platformer') initPlatformer();
+            if (tabId === 'catch') initCatchGame();
+            if (tabId === 'flow') initFlowGame();
         });
     });
 
     loadGallery();
+    updatePhraseProgress();
     updateRandomPhrase();
     document.getElementById('nextPhraseBtn')?.addEventListener('click', updateRandomPhrase);
     addNotificationButton();
@@ -1721,6 +1835,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createMusicPlayer();
     loadAchievements();
+
+    const savedTotalHearts = localStorage.getItem('totalHearts');
+    if (savedTotalHearts) totalHearts = parseInt(savedTotalHearts, 10) || 0;
+
     renderAchievements();
 });
 // ---------- POPUP ДОСТИЖЕНИЙ ----------
@@ -1983,10 +2101,13 @@ function initDifferencesGameV2() {
         'click',
         () => {
             const board = document.querySelector('.differences-board');
+            const btn = document.getElementById('diffZoomBtn');
 
             if (!board) return;
 
-            board.classList.toggle('zoomed');
+            const zoomed = board.classList.toggle('zoomed');
+
+            if (btn) btn.textContent = zoomed ? '🔍 Уменьшить' : '🔍 Увеличить';
         }
     );
 
@@ -3911,86 +4032,9 @@ function showDifferenceAchievementPopupV2(
     achievement
 ) {
 
-    const popup =
-        document.createElement(
-            'div'
-        );
-
-    popup.className =
-        'difference-achievement-popup';
-
-    popup.innerHTML =
-        `
-        <div class="difference-achievement-card">
-
-            <div class="difference-achievement-glow"></div>
-
-            <div class="difference-achievement-icon">
-                ${achievement.icon}
-            </div>
-
-            <div class="difference-achievement-label">
-                ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО
-            </div>
-
-            <h3>
-                ${achievement.name}
-            </h3>
-
-            <p>
-                ${achievement.desc}
-            </p>
-
-            <button>
-                Красиво ❤️
-            </button>
-
-        </div>
-        `;
-
-    document.body.appendChild(
-        popup
-    );
-
-    const close =
-        () => {
-
-            popup.classList.remove(
-                'show'
-            );
-
-            setTimeout(
-                () => popup.remove(),
-                300
-            );
-
-        };
-
-    popup
-        .querySelector('button')
-        .onclick = close;
-
-    popup.onclick = event => {
-
-        if (
-            event.target === popup
-        ) {
-            close();
-        }
-
-    };
-
-    requestAnimationFrame(
-        () =>
-            popup.classList.add(
-                'show'
-            )
-    );
-
-    setTimeout(
-        close,
-        6000
-    );
+    // Переиспользуем общий стилизованный попап достижений,
+    // т.к. для класса difference-achievement-popup нет CSS.
+    showAchievementPopup(achievement);
 
 }
 
@@ -4040,3 +4084,1052 @@ document.addEventListener(
 
     }
 );
+
+
+// =========================================================
+// 🎲 ОБЩИЕ ХЕЛПЕРЫ ДЛЯ НОВЫХ ИГР
+// =========================================================
+
+function fRandInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function fPick(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function fShuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+}
+
+
+// =========================================================
+// 💫 ИГРА «ЛОВИ МОМЕНТЫ» — бесконечная процедурная аркада
+// =========================================================
+
+const CATCH_GOOD = [
+    { emoji: '💗', points: 10 },
+    { emoji: '⭐', points: 12 },
+    { emoji: '🌸', points: 10 },
+    { emoji: '🎁', points: 15 },
+    { emoji: '🍫', points: 14 },
+    { emoji: '🧸', points: 12 }
+];
+
+const CATCH_BAD = ['🌧️', '⚡', '🌵', '💣', '🐍'];
+
+const CATCH_POWERUPS = [
+    { id: 'shield', emoji: '🛡', duration: 6, label: 'Щит' },
+    { id: 'magnet', emoji: '🧲', duration: 7, label: 'Магнит' },
+    { id: 'slow', emoji: '⏳', duration: 5, label: 'Замедление' },
+    { id: 'double', emoji: '✨', duration: 8, label: 'Двойные очки' },
+    { id: 'life', emoji: '❤️', duration: 0, label: 'Жизнь' }
+];
+
+class CatchGame {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return;
+
+        this.ctx = this.canvas.getContext('2d');
+        this.width = 0;
+        this.height = 0;
+
+        this.running = false;
+        this.paused = false;
+        this.frameId = null;
+        this.lastTime = 0;
+
+        this.reset();
+
+        this.player = { x: 0, y: 0, w: 60, h: 44, targetX: 0 };
+        this.keys = { left: false, right: false };
+
+        this.onPointerMove = this.handlePointerMove.bind(this);
+        this.onKeyDown = this.handleKeyDown.bind(this);
+        this.onKeyUp = this.handleKeyUp.bind(this);
+        this.onResize = () => { if (this.running) this.resize(); };
+        this.onVisibility = () => {
+            this.paused = document.hidden;
+            if (!this.paused) this.lastTime = performance.now();
+        };
+
+        this.canvas.addEventListener('pointermove', this.onPointerMove);
+        this.canvas.addEventListener('pointerdown', this.onPointerMove);
+        window.addEventListener('keydown', this.onKeyDown);
+        window.addEventListener('keyup', this.onKeyUp);
+        window.addEventListener('resize', this.onResize);
+        document.addEventListener('visibilitychange', this.onVisibility);
+
+        const startBtn = document.getElementById('catchStartBtn');
+        if (startBtn) startBtn.addEventListener('click', () => this.start());
+
+        this.resize();
+        this.updateStatsUI();
+    }
+
+    reset() {
+        this.score = 0;
+        this.combo = 0;
+        this.bestCombo = 0;
+        this.lives = 3;
+        this.multiplier = 1;
+        this.catches = 0;
+        this.powerupsCollected = 0;
+        this.elapsed = 0;
+        this.items = [];
+        this.floaters = [];
+        this.spawnTimer = 0;
+        this.powerTimer = 6;
+        this.activePowerups = {};
+        this.flashTime = 0;
+        this.flashColor = '#ffffff';
+    }
+
+    resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.width = rect.width;
+        this.height = rect.height;
+        this.canvas.width = Math.round(rect.width * dpr);
+        this.canvas.height = Math.round(rect.height * dpr);
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        this.player.w = Math.max(52, this.width * 0.2);
+        this.player.h = this.player.w * 0.72;
+        this.player.y = this.height - this.player.h / 2 - 12;
+
+        if (!this.player.x) this.player.x = this.width / 2;
+        this.player.x = this.clampX(this.player.x);
+        this.player.targetX = this.player.x;
+    }
+
+    clampX(x) {
+        const half = this.player.w / 2;
+        return Math.min(Math.max(x, half), this.width - half);
+    }
+
+    handlePointerMove(e) {
+        if (!this.running) return;
+        const rect = this.canvas.getBoundingClientRect();
+        this.player.targetX = this.clampX(e.clientX - rect.left);
+    }
+
+    handleKeyDown(e) {
+        if (!this.running) return;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); this.keys.left = true; }
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); this.keys.right = true; }
+    }
+
+    handleKeyUp(e) {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+    }
+
+    start() {
+        if (!audioContext) initAudio();
+        this.resize();
+        this.reset();
+        this.player.x = this.width / 2;
+        this.player.targetX = this.player.x;
+        this.running = true;
+        this.paused = false;
+        this.lastTime = performance.now();
+        this.hideOverlay();
+        this.updateStatsUI();
+        if (this.frameId) cancelAnimationFrame(this.frameId);
+        this.frameId = requestAnimationFrame(t => this.loop(t));
+    }
+
+    stop() {
+        this.running = false;
+        this.keys.left = false;
+        this.keys.right = false;
+        if (this.frameId) {
+            cancelAnimationFrame(this.frameId);
+            this.frameId = null;
+        }
+    }
+
+    loop(timestamp) {
+        if (!this.running) return;
+        const dt = Math.min((timestamp - this.lastTime) / 1000, 0.05);
+        this.lastTime = timestamp;
+
+        if (!this.paused) {
+            this.update(dt);
+            this.draw();
+        }
+
+        this.frameId = requestAnimationFrame(t => this.loop(t));
+    }
+
+    update(dt) {
+        this.elapsed += dt;
+
+        // Таймеры бонусов
+        for (const id in this.activePowerups) {
+            this.activePowerups[id] -= dt;
+            if (this.activePowerups[id] <= 0) delete this.activePowerups[id];
+        }
+
+        // Сложность растёт со временем
+        const slowFactor = this.activePowerups.slow ? 0.55 : 1;
+        const fallSpeed = Math.min(150 + this.elapsed * 5, 430) * slowFactor;
+        const spawnInterval = Math.max(0.34, 0.95 - this.elapsed * 0.012);
+        const badChance = Math.min(0.46, 0.12 + this.elapsed * 0.005);
+
+        // Управление игроком
+        const accel = 1600;
+        if (this.keys.left) this.player.targetX -= accel * dt;
+        if (this.keys.right) this.player.targetX += accel * dt;
+        this.player.targetX = this.clampX(this.player.targetX);
+        this.player.x += (this.player.targetX - this.player.x) * Math.min(1, dt * 16);
+
+        // Спавн объектов
+        this.spawnTimer -= dt;
+        if (this.spawnTimer <= 0) {
+            this.spawnTimer = spawnInterval * (0.8 + Math.random() * 0.4);
+            this.spawnItem(fallSpeed, badChance);
+        }
+        this.powerTimer -= dt;
+        if (this.powerTimer <= 0) {
+            this.powerTimer = 9 + Math.random() * 6;
+            this.spawnPowerup(fallSpeed);
+        }
+
+        // Движение объектов
+        const magnet = !!this.activePowerups.magnet;
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const it = this.items[i];
+
+            if (magnet && it.good) {
+                const dx = this.player.x - it.x;
+                const dy = this.player.y - it.y;
+                const dist = Math.hypot(dx, dy) || 1;
+                it.x += (dx / dist) * 280 * dt;
+                it.y += (dy / dist) * 280 * dt;
+            }
+
+            it.y += it.vy * dt;
+            it.rot += it.spin * dt;
+
+            if (this.collides(it)) {
+                this.onCatch(it);
+                this.items.splice(i, 1);
+                continue;
+            }
+
+            if (it.y - it.r > this.height) {
+                this.onMiss(it);
+                this.items.splice(i, 1);
+            }
+        }
+
+        // Всплывающие подписи
+        for (let i = this.floaters.length - 1; i >= 0; i--) {
+            const f = this.floaters[i];
+            f.y -= 44 * dt;
+            f.life -= dt;
+            if (f.life <= 0) this.floaters.splice(i, 1);
+        }
+
+        if (this.flashTime > 0) this.flashTime -= dt;
+    }
+
+    collides(it) {
+        const hw = this.player.w / 2;
+        const hh = this.player.h / 2;
+        const cx = Math.max(this.player.x - hw, Math.min(it.x, this.player.x + hw));
+        const cy = Math.max(this.player.y - hh, Math.min(it.y, this.player.y + hh));
+        const dx = it.x - cx;
+        const dy = it.y - cy;
+        return dx * dx + dy * dy <= it.r * it.r;
+    }
+
+    spawnItem(fallSpeed, badChance) {
+        const bad = Math.random() < badChance;
+        const r = Math.max(15, this.width * 0.045);
+        const item = {
+            x: r + Math.random() * (this.width - r * 2),
+            y: -r,
+            r,
+            vy: fallSpeed * (0.85 + Math.random() * 0.35),
+            good: !bad,
+            isPower: false,
+            power: null,
+            points: 0,
+            rot: 0,
+            spin: (Math.random() - 0.5) * 2
+        };
+
+        if (bad) {
+            item.emoji = fPick(CATCH_BAD);
+        } else {
+            const g = fPick(CATCH_GOOD);
+            item.emoji = g.emoji;
+            item.points = g.points;
+        }
+
+        this.items.push(item);
+    }
+
+    spawnPowerup(fallSpeed) {
+        const p = fPick(CATCH_POWERUPS);
+        const r = Math.max(17, this.width * 0.05);
+        this.items.push({
+            x: r + Math.random() * (this.width - r * 2),
+            y: -r,
+            r,
+            vy: fallSpeed * 0.8,
+            good: true,
+            isPower: true,
+            power: p.id,
+            emoji: p.emoji,
+            points: 0,
+            rot: 0,
+            spin: 0
+        });
+    }
+
+    onCatch(it) {
+        if (it.isPower) {
+            this.applyPowerup(it.power);
+            this.powerupsCollected++;
+            this.addFloater(it.x, it.y, 'бонус', '#b9827c');
+            playCorrectSound();
+            this.updateStatsUI();
+            this.checkCatchAchievements();
+            return;
+        }
+
+        if (!it.good) {
+            if (this.activePowerups.shield) {
+                this.addFloater(it.x, it.y, 'щит!', '#4aa3ff');
+                playCorrectSound();
+                return;
+            }
+            this.lives--;
+            this.combo = 0;
+            this.multiplier = 1;
+            this.flash('#ffd0d0', 0.25);
+            this.addFloater(it.x, it.y, '-1 ❤️', '#d9534f');
+            playWrongSound();
+            this.updateStatsUI();
+            if (this.lives <= 0) this.gameOver();
+            return;
+        }
+
+        this.catches++;
+        this.combo++;
+        this.bestCombo = Math.max(this.bestCombo, this.combo);
+        this.multiplier = Math.min(1 + Math.floor(this.combo / 5), 5);
+
+        const double = this.activePowerups.double ? 2 : 1;
+        const gain = Math.round(it.points * this.multiplier * double);
+        this.score += gain;
+
+        this.addFloater(it.x, it.y, '+' + gain, '#3fb673');
+        playCorrectSound();
+        this.updateStatsUI();
+        this.checkCatchAchievements();
+    }
+
+    onMiss(it) {
+        if (it.good && !it.isPower && this.combo > 0) {
+            this.combo = 0;
+            this.multiplier = 1;
+            this.updateStatsUI();
+        }
+    }
+
+    applyPowerup(id) {
+        if (id === 'life') {
+            this.lives = Math.min(5, this.lives + 1);
+            return;
+        }
+        const p = CATCH_POWERUPS.find(x => x.id === id);
+        this.activePowerups[id] = p ? p.duration : 5;
+    }
+
+    addFloater(x, y, text, color) {
+        this.floaters.push({ x, y, text, color, life: 0.9 });
+    }
+
+    flash(color, time) {
+        this.flashColor = color;
+        this.flashTime = time;
+    }
+
+    draw() {
+        const ctx = this.ctx;
+        const W = this.width;
+        const H = this.height;
+
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, '#ffe9e3');
+        grad.addColorStop(0.55, '#ffdcd2');
+        grad.addColorStop(1, '#ffcabd');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Активные бонусы
+        let bx = 16;
+        ctx.font = '20px system-ui, "Segoe UI Emoji"';
+        for (const id in this.activePowerups) {
+            const p = CATCH_POWERUPS.find(x => x.id === id);
+            if (!p) continue;
+            ctx.fillText(p.emoji, bx, 22);
+            bx += 28;
+        }
+
+        // Объекты
+        for (const it of this.items) {
+            ctx.save();
+            ctx.translate(it.x, it.y);
+            ctx.rotate(it.rot);
+            ctx.font = `${Math.round(it.r * 2)}px system-ui, "Segoe UI Emoji"`;
+            ctx.fillText(it.emoji, 0, 0);
+            ctx.restore();
+        }
+
+        // Игрок
+        ctx.save();
+        ctx.translate(this.player.x, this.player.y);
+        if (this.activePowerups.shield) {
+            ctx.beginPath();
+            ctx.arc(0, 0, this.player.w * 0.75, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(74, 163, 255, 0.85)';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+        ctx.font = `${Math.round(this.player.h * 1.2)}px system-ui, "Segoe UI Emoji"`;
+        ctx.fillText('🧺', 0, 0);
+        ctx.restore();
+
+        // Подписи
+        ctx.font = 'bold 20px system-ui';
+        for (const f of this.floaters) {
+            ctx.globalAlpha = Math.max(0, Math.min(1, f.life));
+            ctx.fillStyle = f.color;
+            ctx.fillText(f.text, f.x, f.y);
+        }
+        ctx.globalAlpha = 1;
+
+        // Вспышка
+        if (this.flashTime > 0) {
+            ctx.globalAlpha = Math.min(1, this.flashTime * 3);
+            ctx.fillStyle = this.flashColor;
+            ctx.fillRect(0, 0, W, H);
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    updateStatsUI() {
+        setText('catchScore', this.score);
+        setText('catchCombo', '×' + Math.max(1, this.combo));
+        setText('catchMultiplier', '×' + this.multiplier);
+        setText('catchLives', '❤️'.repeat(Math.max(0, this.lives)));
+        setText('catchBestScore', Number(localStorage.getItem('catchBestScore') || 0));
+    }
+
+    saveBest() {
+        const best = Number(localStorage.getItem('catchBestScore') || 0);
+        if (this.score > best) localStorage.setItem('catchBestScore', this.score);
+
+        const bestCombo = Number(localStorage.getItem('catchBestCombo') || 0);
+        if (this.bestCombo > bestCombo) localStorage.setItem('catchBestCombo', this.bestCombo);
+
+        const total = Number(localStorage.getItem('catchTotalScore') || 0) + this.score;
+        localStorage.setItem('catchTotalScore', total);
+    }
+
+    checkCatchAchievements() {
+        if (this.catches >= 1) unlockAchievementById(201);
+        if (this.bestCombo >= 10) unlockAchievementById(202);
+        if (this.powerupsCollected >= 5) unlockAchievementById(203);
+        if (this.elapsed >= 60) unlockAchievementById(204);
+        if (this.score >= 3000) unlockAchievementById(205);
+    }
+
+    showOverlay(icon, title, text, buttonText) {
+        const ov = document.getElementById('catchOverlay');
+        if (!ov) return;
+        setText('catchOverlayIcon', icon);
+        setText('catchOverlayTitle', title);
+        setText('catchOverlayText', text);
+        setText('catchStartBtn', buttonText);
+        ov.classList.add('show');
+    }
+
+    hideOverlay() {
+        document.getElementById('catchOverlay')?.classList.remove('show');
+    }
+
+    gameOver() {
+        this.stop();
+        this.saveBest();
+        this.checkCatchAchievements();
+        this.updateStatsUI();
+        this.showOverlay(
+            '💔',
+            'Игра окончена',
+            `Ты набрала ${this.score} очков. Максимальное комбо: ×${this.bestCombo}.`,
+            'Играть снова'
+        );
+    }
+}
+
+let catchGame = null;
+
+function initCatchGame() {
+    if (!document.getElementById('catchCanvas')) return;
+    if (!catchGame) catchGame = new CatchGame('catchCanvas');
+    if (catchGame.running) return;
+
+    catchGame.resize();
+    catchGame.updateStatsUI();
+    catchGame.showOverlay(
+        '💫',
+        'Лови моменты',
+        'Управляй мышью, пальцем или стрелками. Собирай хорошее — избегай плохого.',
+        'Начать игру'
+    );
+}
+
+function stopCatchGame() {
+    if (catchGame) catchGame.stop();
+}
+
+
+// =========================================================
+// 🧠 ИГРА «ПОТОК» — бесконечные процедурные задачи
+// =========================================================
+
+const FLOW_ORDINALS = [
+    'первая', 'вторая', 'третья', 'четвёртая', 'пятая', 'шестая', 'седьмая'
+];
+
+// Множественный выбор из чисел с правдоподобными дистракторами
+function fNumberChoice(prompt, answer, distractorCount, spread) {
+    const set = new Set([answer]);
+    let guard = 0;
+    while (set.size < distractorCount + 1 && guard++ < 300) {
+        const delta = fRandInt(1, Math.max(2, spread)) * (Math.random() < 0.5 ? -1 : 1);
+        const candidate = answer + delta;
+        if (candidate > 0) set.add(candidate);
+    }
+    const options = fShuffle([...set]);
+    return {
+        prompt,
+        options: options.map(String),
+        answer: options.indexOf(answer)
+    };
+}
+
+function fGenSequence(level) {
+    const step = fRandInt(2, 4 + level);
+    const start = fRandInt(1, 9 + level * 2);
+    const seq = [];
+    for (let i = 0; i < 4; i++) seq.push(start + step * i);
+    const answer = start + step * 4;
+    return fNumberChoice(`Продолжи ряд: ${seq.join(', ')}, ?`, answer, 3, Math.max(3, step));
+}
+
+function fGenGeometric(level) {
+    const ratio = fPick([2, 3]);
+    let value = fRandInt(1, 4);
+    const len = level >= 6 ? 4 : 3;
+    const seq = [];
+    for (let i = 0; i < len; i++) {
+        seq.push(value);
+        value *= ratio;
+    }
+    return fNumberChoice(`Продолжи: ${seq.join(', ')}, ?`, value, 3, Math.max(4, Math.round(value * 0.2)));
+}
+
+function fGenAlternating(level) {
+    const a0 = fRandInt(1, 9);
+    const aStep = fRandInt(2, 5);
+    const b0 = fRandInt(1, 9);
+    const bStep = fRandInt(2, 5);
+    const seq = [];
+    for (let i = 0; i < 3; i++) {
+        seq.push(a0 + aStep * i);
+        seq.push(b0 + bStep * i);
+    }
+    const answer = a0 + aStep * 3;
+    return fNumberChoice(`Продолжи: ${seq.join(', ')}, ?`, answer, 3, Math.max(3, aStep + 1));
+}
+
+function fGenOddNumber(level) {
+    const mode = fPick(['even', 'multiple3', 'multiple5']);
+    const match = (n) =>
+        mode === 'even' ? n % 2 === 0 :
+        mode === 'multiple3' ? n % 3 === 0 :
+        n % 5 === 0;
+
+    const max = 20 + level * 3;
+    const numbers = [];
+    let guard = 0;
+    while (numbers.length < 3 && guard++ < 200) {
+        const n = fRandInt(2, max);
+        if (match(n) && !numbers.includes(n)) numbers.push(n);
+    }
+
+    let odd = 0;
+    guard = 0;
+    do {
+        odd = fRandInt(2, max);
+    } while (match(odd) && guard++ < 200);
+    if (match(odd)) odd = numbers[0] + 1;
+
+    const all = fShuffle([...numbers, odd]);
+    return {
+        prompt: 'Найди лишнее число:',
+        options: all.map(String),
+        answer: all.indexOf(odd)
+    };
+}
+
+function fGenCompare(level) {
+    const nums = [];
+    let guard = 0;
+    while (nums.length < 4 && guard++ < 200) {
+        const n = fRandInt(10, 40 + level * 5);
+        if (!nums.includes(n)) nums.push(n);
+    }
+    const askMax = Math.random() < 0.5;
+    const target = askMax ? Math.max(...nums) : Math.min(...nums);
+    const shuffled = fShuffle(nums);
+    return {
+        prompt: askMax ? 'Выбери самое большое число' : 'Выбери самое маленькое число',
+        options: shuffled.map(String),
+        answer: shuffled.indexOf(target)
+    };
+}
+
+function fGenMath(level) {
+    const op = fPick(['+', '-', '×']);
+    let a, b, answer;
+
+    if (op === '+') {
+        a = fRandInt(5, 20 + level * 5);
+        b = fRandInt(3, 20 + level * 5);
+        answer = a + b;
+    } else if (op === '-') {
+        a = fRandInt(10, 30 + level * 5);
+        b = fRandInt(2, a - 1);
+        answer = a - b;
+    } else {
+        a = fRandInt(2, 4 + level);
+        b = fRandInt(2, 4 + level);
+        answer = a * b;
+    }
+
+    return fNumberChoice(`${a} ${op} ${b} = ?`, answer, 3, Math.max(3, Math.round(answer * 0.25)));
+}
+
+function fGenCount(level) {
+    const emoji = fPick(['❤️', '⭐', '🌸', '💗', '🍓', '🎁']);
+    const count = fRandInt(3, 6 + Math.floor(level / 2));
+    const text = Array(count).fill(emoji).join(' ');
+    return fNumberChoice(`Сколько здесь: ${text}`, count, 3, Math.max(2, Math.ceil(count / 2)));
+}
+
+function fGenMemory(level) {
+    const len = Math.min(3 + Math.floor(level / 3), 7);
+    const digits = [];
+    for (let i = 0; i < len; i++) digits.push(fRandInt(1, 9));
+
+    const position = fRandInt(1, len);
+    const choice = fNumberChoice('', digits[position - 1], 3, 3);
+
+    return {
+        prompt: `Какая цифра была ${FLOW_ORDINALS[position - 1]}?`,
+        options: choice.options,
+        answer: choice.answer,
+        reveal: digits,
+        revealPrompt: 'Запомни последовательность',
+        revealMs: 700 + len * 140
+    };
+}
+
+class FlowGame {
+    constructor() {
+        this.running = false;
+        this.score = 0;
+        this.streak = 0;
+        this.bestStreak = 0;
+        this.lives = 3;
+        this.level = 1;
+        this.correctCount = 0;
+        this.task = null;
+        this.timeLeft = 0;
+        this.timeLimit = 1;
+        this.timerId = null;
+        this.revealTimeout = null;
+        this.nextTimeout = null;
+        this.questionStart = 0;
+        this.answered = true;
+        this.optionButtons = [];
+
+        this.onOptionClick = this.onOptionClick.bind(this);
+
+        const startBtn = document.getElementById('flowStartBtn');
+        if (startBtn) startBtn.addEventListener('click', () => this.start());
+    }
+
+    start() {
+        if (!audioContext) initAudio();
+        this.clearTimers();
+        this.score = 0;
+        this.streak = 0;
+        this.bestStreak = 0;
+        this.lives = 3;
+        this.level = 1;
+        this.correctCount = 0;
+        this.running = true;
+        this.hideOverlay();
+        this.updateStatsUI();
+        this.nextTask();
+    }
+
+    stop() {
+        this.running = false;
+        this.clearTimers();
+        this.clearOptions();
+    }
+
+    clearTimers() {
+        if (this.timerId) { clearInterval(this.timerId); this.timerId = null; }
+        if (this.revealTimeout) { clearTimeout(this.revealTimeout); this.revealTimeout = null; }
+        if (this.nextTimeout) { clearTimeout(this.nextTimeout); this.nextTimeout = null; }
+    }
+
+    clearOptions() {
+        const box = document.getElementById('flowOptions');
+        if (box) box.innerHTML = '';
+        this.optionButtons = [];
+    }
+
+    pickGenerator() {
+        const generators = [fGenSequence, fGenOddNumber, fGenCompare, fGenMath];
+        if (this.level >= 2) generators.push(fGenCount, fGenGeometric);
+        if (this.level >= 3) generators.push(fGenAlternating, fGenMemory);
+        return fPick(generators);
+    }
+
+    nextTask() {
+        if (!this.running) return;
+
+        this.clearTimers();
+        this.clearOptions();
+        this.answered = false;
+
+        this.level = 1 + Math.floor(this.correctCount / 3);
+        this.task = this.pickGenerator()(this.level);
+
+        this.timeLimit = Math.max(3.5, 13 - this.level * 0.55);
+        this.timeLeft = this.timeLimit;
+
+        const promptEl = document.getElementById('flowPrompt');
+        const startAnswering = () => {
+            if (!this.running) return;
+            this.renderOptions();
+            this.questionStart = performance.now();
+            this.startTimer();
+        };
+
+        if (this.task.reveal) {
+            if (promptEl) {
+                promptEl.innerHTML =
+                    `<div><div class="flow-reveal-title">${this.task.revealPrompt || 'Запомни'}</div>` +
+                    `<div class="flow-reveal">${this.task.reveal.map(v => `<span>${v}</span>`).join('')}</div></div>`;
+            }
+            this.updateTimerUI();
+            this.revealTimeout = setTimeout(() => {
+                this.revealTimeout = null;
+                if (!this.running) return;
+                if (promptEl) promptEl.textContent = this.task.prompt;
+                startAnswering();
+            }, this.task.revealMs || 900);
+        } else {
+            if (promptEl) promptEl.textContent = this.task.prompt;
+            startAnswering();
+        }
+    }
+
+    renderOptions() {
+        const box = document.getElementById('flowOptions');
+        if (!box || !this.task) return;
+
+        box.innerHTML = '';
+        this.optionButtons = [];
+
+        this.task.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'flow-option';
+            btn.textContent = option;
+            btn.dataset.index = index;
+            btn.addEventListener('click', this.onOptionClick);
+            box.appendChild(btn);
+            this.optionButtons.push(btn);
+        });
+    }
+
+    onOptionClick(event) {
+        if (!this.running || this.answered) return;
+
+        const index = Number(event.currentTarget.dataset.index);
+        const correct = index === this.task.answer;
+        const elapsed = (performance.now() - this.questionStart) / 1000;
+
+        this.answered = true;
+        this.clearTimers();
+
+        this.optionButtons.forEach(btn => {
+            btn.disabled = true;
+            if (Number(btn.dataset.index) === this.task.answer) btn.classList.add('correct');
+        });
+
+        if (correct) {
+            this.streak++;
+            this.bestStreak = Math.max(this.bestStreak, this.streak);
+            this.correctCount++;
+
+            const multiplier = Math.min(1 + Math.floor(this.streak / 5), 5);
+            const speedBonus = Math.max(0, Math.round((this.timeLeft / this.timeLimit) * 50));
+            const gain = Math.round((100 + this.level * 10 + speedBonus) * multiplier);
+            this.score += gain;
+
+            playCorrectSound();
+            this.showFeedback('+' + gain, true);
+
+            if (elapsed < 1) unlockAchievementById(303);
+
+            this.updateStatsUI();
+            this.checkFlowAchievements();
+
+            this.nextTimeout = setTimeout(() => {
+                this.nextTimeout = null;
+                if (this.running) this.nextTask();
+            }, 550);
+        } else {
+            event.currentTarget.classList.add('wrong');
+            this.lives--;
+            this.streak = 0;
+            playWrongSound();
+            this.showFeedback('Неверно', false);
+            this.updateStatsUI();
+
+            this.nextTimeout = setTimeout(() => {
+                this.nextTimeout = null;
+                if (this.lives <= 0) this.gameOver();
+                else if (this.running) this.nextTask();
+            }, 700);
+        }
+    }
+
+    onTimeout() {
+        if (this.answered) return;
+
+        this.answered = true;
+        this.clearTimers();
+
+        this.lives--;
+        this.streak = 0;
+
+        this.optionButtons.forEach(btn => {
+            btn.disabled = true;
+            if (Number(btn.dataset.index) === this.task.answer) btn.classList.add('correct');
+        });
+
+        playWrongSound();
+        this.showFeedback('Время вышло', false);
+        this.updateStatsUI();
+
+        this.nextTimeout = setTimeout(() => {
+            this.nextTimeout = null;
+            if (this.lives <= 0) this.gameOver();
+            else if (this.running) this.nextTask();
+        }, 750);
+    }
+
+    startTimer() {
+        const tick = 100;
+        this.timerId = setInterval(() => {
+            if (!this.running) return;
+            if (document.hidden) return;
+            this.timeLeft -= tick / 1000;
+            if (this.timeLeft <= 0) {
+                this.timeLeft = 0;
+                this.updateTimerUI();
+                this.onTimeout();
+                return;
+            }
+            this.updateTimerUI();
+        }, tick);
+    }
+
+    updateTimerUI() {
+        const fill = document.getElementById('flowTimerFill');
+        if (!fill) return;
+        const ratio = Math.max(0, Math.min(1, this.timeLeft / this.timeLimit));
+        fill.style.width = (ratio * 100) + '%';
+        fill.classList.toggle('low', ratio < 0.3);
+    }
+
+    showFeedback(text, success) {
+        const el = document.createElement('div');
+        el.className = 'difference-feedback ' + (success ? 'success' : 'error');
+        el.textContent = text;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 900);
+    }
+
+    updateStatsUI() {
+        setText('flowScore', this.score);
+        setText('flowStreak', this.streak);
+        setText('flowMultiplier', '×' + Math.min(1 + Math.floor(this.streak / 5), 5));
+        setText('flowLevel', this.level);
+        setText('flowBestScore', Number(localStorage.getItem('flowBestScore') || 0));
+    }
+
+    saveBest() {
+        const best = Number(localStorage.getItem('flowBestScore') || 0);
+        if (this.score > best) localStorage.setItem('flowBestScore', this.score);
+
+        const bestStreak = Number(localStorage.getItem('flowBestStreak') || 0);
+        if (this.bestStreak > bestStreak) localStorage.setItem('flowBestStreak', this.bestStreak);
+    }
+
+    checkFlowAchievements() {
+        if (this.correctCount >= 1) unlockAchievementById(301);
+        if (this.bestStreak >= 10) unlockAchievementById(302);
+        if (this.level >= 10) unlockAchievementById(304);
+        if (this.score >= 2000) unlockAchievementById(305);
+    }
+
+    showOverlay(icon, title, text, buttonText) {
+        const ov = document.getElementById('flowOverlay');
+        if (!ov) return;
+        setText('flowOverlayIcon', icon);
+        setText('flowOverlayTitle', title);
+        setText('flowOverlayText', text);
+        setText('flowStartBtn', buttonText);
+        ov.classList.add('show');
+    }
+
+    hideOverlay() {
+        document.getElementById('flowOverlay')?.classList.remove('show');
+    }
+
+    gameOver() {
+        this.stop();
+        this.saveBest();
+        this.checkFlowAchievements();
+
+        const promptEl = document.getElementById('flowPrompt');
+        if (promptEl) promptEl.textContent = 'Поток прервался';
+
+        this.updateStatsUI();
+
+        this.showOverlay(
+            '🌊',
+            'Поток прервался',
+            `Очки: ${this.score}. Лучшая серия: ${this.bestStreak}. Уровень: ${this.level}.`,
+            'Попробовать снова'
+        );
+    }
+}
+
+let flowGame = null;
+
+function initFlowGame() {
+    if (!document.getElementById('flowBoard')) return;
+    if (!flowGame) flowGame = new FlowGame();
+    if (flowGame.running) return;
+
+    flowGame.updateStatsUI();
+
+    const promptEl = document.getElementById('flowPrompt');
+    if (promptEl) promptEl.textContent = 'Нажми «Начать», чтобы погрузиться в поток';
+
+    flowGame.showOverlay(
+        '🧠',
+        'Поток',
+        'Отвечай быстро и точно. Ошибка или время вышло — минус жизнь.',
+        'Начать игру'
+    );
+}
+
+function stopFlowGame() {
+    if (flowGame) flowGame.stop();
+}
+
+
+// =========================================================
+// ПРИВЕТСТВИЕ И LIGHTBOX ГАЛЕРЕИ
+// =========================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Приветствие по времени суток
+    const greeting = document.getElementById('homeGreeting');
+    if (greeting) {
+        const hour = new Date().getHours();
+        let text;
+        if (hour < 6) text = 'Доброй ночи, любимая 🌙';
+        else if (hour < 12) text = 'Доброе утро, любимая ☀️';
+        else if (hour < 18) text = 'Добрый день, любимая 🌸';
+        else text = 'Добрый вечер, любимая 🌙';
+        greeting.textContent = text;
+    }
+
+    // Lightbox галереи
+    const lightbox = document.getElementById('galleryLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const closeBtn = document.getElementById('lightboxClose');
+    const gallery = document.getElementById('galleryContainer');
+
+    const closeLightbox = () => {
+        if (!lightbox) return;
+        lightbox.classList.remove('show');
+        lightbox.setAttribute('aria-hidden', 'true');
+    };
+
+    gallery?.addEventListener('click', (event) => {
+        const img = event.target.closest('img');
+        if (!img || !lightbox || !lightboxImage) return;
+        lightboxImage.src = img.src;
+        lightboxImage.alt = img.alt;
+        lightbox.classList.add('show');
+        lightbox.setAttribute('aria-hidden', 'false');
+    });
+
+    closeBtn?.addEventListener('click', closeLightbox);
+
+    lightbox?.addEventListener('click', (event) => {
+        if (event.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeLightbox();
+    });
+});
