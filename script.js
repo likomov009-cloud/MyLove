@@ -4130,6 +4130,22 @@ function setText(id, value) {
     if (el) el.textContent = value;
 }
 
+// Стек шрифтов для цветных emoji в canvas.
+// Без явных цветных emoji-шрифтов мобильные браузеры могут
+// отрисовать emoji монохромным глифом, залитым текущим fillStyle.
+const EMOJI_FONT =
+    '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", ' +
+    '"Twemoji Mozilla", "EmojiOne Color", "Android Emoji", system-ui, sans-serif';
+
+// Рисуем emoji так, чтобы цвет не зависел от текущего fillStyle.
+function drawEmoji(ctx, emoji, x, y, size) {
+    ctx.font = `${Math.round(size)}px ${EMOJI_FONT}`;
+    // Страховка на случай монохромного рендера: глиф не должен
+    // сливаться со светлым фоном игрового поля.
+    ctx.fillStyle = '#3b2a2a';
+    ctx.fillText(emoji, x, y);
+}
+
 // Мягкое уведомление о новом рекорде
 let recordToastTimer = null;
 function announceRecord(text) {
@@ -4524,11 +4540,10 @@ class CatchGame {
 
         // Активные бонусы
         let bx = 16;
-        ctx.font = '20px system-ui, "Segoe UI Emoji"';
         for (const id in this.activePowerups) {
             const p = CATCH_POWERUPS.find(x => x.id === id);
             if (!p) continue;
-            ctx.fillText(p.emoji, bx, 22);
+            drawEmoji(ctx, p.emoji, bx, 22, 20);
             bx += 28;
         }
 
@@ -4537,8 +4552,7 @@ class CatchGame {
             ctx.save();
             ctx.translate(it.x, it.y);
             ctx.rotate(it.rot);
-            ctx.font = `${Math.round(it.r * 2)}px system-ui, "Segoe UI Emoji"`;
-            ctx.fillText(it.emoji, 0, 0);
+            drawEmoji(ctx, it.emoji, 0, 0, it.r * 2);
             ctx.restore();
         }
 
@@ -4552,8 +4566,7 @@ class CatchGame {
             ctx.lineWidth = 4;
             ctx.stroke();
         }
-        ctx.font = `${Math.round(this.player.h * 1.2)}px system-ui, "Segoe UI Emoji"`;
-        ctx.fillText('🧺', 0, 0);
+        drawEmoji(ctx, '🧺', 0, 0, this.player.h * 1.2);
         ctx.restore();
 
         // Подписи
