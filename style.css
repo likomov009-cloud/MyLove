@@ -3575,3 +3575,435 @@ button:disabled,
         font-size: 0.72rem;
     }
 }
+
+/* =========================================================
+   ✨ WOW PASS — кинематографичное, живое, дорогое
+   ========================================================= */
+
+/* ---------- Живой фон ---------- */
+body {
+    background-image: none;
+    background-color: #efd6ce;
+}
+
+.bg-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-photo {
+    position: absolute;
+    inset: -5%;
+    background-image: url('image/background.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    transform: translate3d(0, 0, 0) scale(1.05);
+    will-change: transform;
+}
+
+.bg-warmth {
+    position: absolute;
+    inset: -22%;
+    opacity: 0.5;
+    mix-blend-mode: screen;
+    background:
+        radial-gradient(38% 42% at 22% 28%, rgba(255, 196, 150, 0.55), transparent 70%),
+        radial-gradient(34% 38% at 78% 24%, rgba(255, 150, 170, 0.42), transparent 70%),
+        radial-gradient(44% 46% at 62% 84%, rgba(255, 210, 170, 0.4), transparent 72%);
+    animation: warmthDrift 30s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+@keyframes warmthDrift {
+    from { transform: translate3d(-2%, -1.5%, 0) scale(1); }
+    to { transform: translate3d(2%, 2%, 0) scale(1.07); }
+}
+
+.bg-hearts {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+    will-change: transform;
+}
+
+/* Виньетка и глубина поверх фона */
+body::before {
+    background:
+        radial-gradient(ellipse at 50% 34%, rgba(0, 0, 0, 0) 42%, rgba(42, 12, 22, 0.3) 100%),
+        rgba(0, 0, 0, 0.16);
+    z-index: 1;
+}
+
+/* Интерактивный тёплый свет за курсором */
+.cursor-light {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 460px;
+    height: 460px;
+    margin: -230px 0 0 -230px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    background: radial-gradient(
+        circle,
+        rgba(255, 214, 170, 0.5),
+        rgba(255, 170, 190, 0.16) 46%,
+        transparent 70%
+    );
+    mix-blend-mode: screen;
+    transition: opacity 0.5s ease;
+    will-change: transform;
+}
+
+.cursor-light.on {
+    opacity: 1;
+}
+
+/* ---------- Кинематографическое открытие ---------- */
+.js .container {
+    opacity: 0;
+    transform: translateY(26px) scale(0.975);
+}
+
+.js.booted .container {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+        opacity 1s var(--ease),
+        transform 1.15s var(--ease);
+}
+
+@keyframes bootUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.js.boot-anim.booted header {
+    animation: bootUp 0.85s 0.1s var(--ease) backwards;
+}
+
+.js.boot-anim.booted .tabs .tab-btn {
+    animation: bootUp 0.6s var(--ease) backwards;
+}
+
+.js.boot-anim.booted .tabs .tab-btn:nth-child(1) { animation-delay: 0.26s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(2) { animation-delay: 0.30s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(3) { animation-delay: 0.34s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(4) { animation-delay: 0.38s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(5) { animation-delay: 0.42s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(6) { animation-delay: 0.46s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(7) { animation-delay: 0.50s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(8) { animation-delay: 0.54s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(9) { animation-delay: 0.58s; }
+.js.boot-anim.booted .tabs .tab-btn:nth-child(10) { animation-delay: 0.62s; }
+
+.js.boot-anim.booted .tab-content.active > * {
+    animation: bootUp 0.7s var(--ease) backwards;
+}
+
+.js.boot-anim.booted .tab-content.active > *:nth-child(1) { animation-delay: 0.5s; }
+.js.boot-anim.booted .tab-content.active > *:nth-child(2) { animation-delay: 0.58s; }
+.js.boot-anim.booted .tab-content.active > *:nth-child(3) { animation-delay: 0.66s; }
+.js.boot-anim.booted .tab-content.active > *:nth-child(4) { animation-delay: 0.74s; }
+.js.boot-anim.booted .tab-content.active > *:nth-child(5) { animation-delay: 0.82s; }
+.js.boot-anim.booted .tab-content.active > *:nth-child(6) { animation-delay: 0.90s; }
+
+/* ---------- Glass-контейнер ---------- */
+.container {
+    z-index: 2;
+    background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.84), rgba(255, 246, 241, 0.76));
+    backdrop-filter: blur(22px) saturate(1.25);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow:
+        0 30px 70px rgba(80, 30, 20, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        0 0 0 1px rgba(255, 255, 255, 0.22);
+    overflow: hidden;
+}
+
+/* Тонкий светящийся кант по краю */
+.container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        130deg,
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0) 32%,
+        rgba(255, 255, 255, 0) 68%,
+        rgba(255, 220, 200, 0.7)
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
+    z-index: 1;
+}
+
+/* Медленный световой блик по стеклу */
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 38%;
+    height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent,
+        rgba(255, 255, 255, 0.45),
+        transparent
+    );
+    transform: translateX(-160%) skewX(-12deg);
+    animation: glassSheen 11s ease-in-out 4s infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes glassSheen {
+    0%, 74% { transform: translateX(-160%) skewX(-12deg); opacity: 0; }
+    80% { opacity: 0.75; }
+    92%, 100% { transform: translateX(330%) skewX(-12deg); opacity: 0; }
+}
+
+/* Контент поверх бликов */
+.container > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* ---------- HERO ---------- */
+.home-hero {
+    transform:
+        perspective(1000px)
+        rotateX(calc(var(--tilt-y, 0) * 1deg))
+        rotateY(calc(var(--tilt-x, 0) * 1deg))
+        translateY(var(--lift, 0));
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition:
+        transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.5s ease;
+}
+
+.home-hero:hover {
+    --lift: -3px;
+    transform:
+        perspective(1000px)
+        rotateX(calc(var(--tilt-y, 0) * 1deg))
+        rotateY(calc(var(--tilt-x, 0) * 1deg))
+        translateY(var(--lift, 0));
+    box-shadow:
+        0 30px 60px rgba(120, 60, 40, 0.17),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.home-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.5), transparent 46%);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.home-heart {
+    animation: heartBreathe 5.5s ease-in-out infinite;
+    will-change: transform;
+}
+
+@keyframes heartBreathe {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.045) translateY(-3px); }
+}
+
+/* ---------- Навигация ---------- */
+.tab-btn {
+    transition:
+        transform 0.25s var(--ease),
+        box-shadow 0.3s var(--ease),
+        background 0.3s var(--ease),
+        color 0.3s var(--ease);
+}
+
+.tab-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow:
+        0 8px 18px rgba(196, 91, 60, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.tab-btn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.tab-btn.active {
+    box-shadow:
+        0 10px 24px rgba(196, 91, 60, 0.34),
+        0 0 20px rgba(255, 150, 120, 0.35);
+}
+
+/* ---------- Карточки: глубина и жизнь ---------- */
+.home-menu-icon {
+    transition: transform 0.35s var(--ease);
+}
+
+.home-menu-card:hover .home-menu-icon {
+    transform: translateY(-3px) scale(1.06);
+}
+
+.home-quick-icon {
+    transition: transform 0.35s var(--ease);
+}
+
+.home-quick-card:hover .home-quick-icon {
+    transform: scale(1.06) rotate(-3deg);
+}
+
+.home-menu-card:nth-child(even) {
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.075),
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.home-original-message .card:hover {
+    transform: translateY(-3px) scale(1.004);
+}
+
+/* ---------- Микровзаимодействия ---------- */
+.phrase-pop {
+    animation: phrasePop 0.5s var(--ease);
+}
+
+.record-toast {
+    position: fixed;
+    left: 50%;
+    top: 13%;
+    z-index: 34000;
+    padding: 12px 24px;
+    border-radius: var(--r-pill);
+    background: linear-gradient(135deg, #ffd76f, #f0a35a);
+    color: #5a3410;
+    font-weight: 900;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    box-shadow: 0 16px 38px rgba(200, 140, 40, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -12px) scale(0.9);
+    transition:
+        opacity 0.35s ease,
+        transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.record-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+}
+
+/* Достижение: лёгкий отклик на карточке */
+.achievement-card:not(.locked) {
+    animation: achievementIn 0.45s var(--ease) backwards;
+}
+
+@keyframes achievementIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Сцена на больших экранах ---------- */
+@media (min-width: 1100px) {
+    .bg-scene::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(55% 50% at 14% 22%, rgba(255, 190, 150, 0.3), transparent 62%),
+            radial-gradient(50% 45% at 86% 76%, rgba(255, 150, 180, 0.24), transparent 62%);
+        mix-blend-mode: screen;
+        pointer-events: none;
+    }
+}
+
+/* ---------- Мобильные: облегчаем эффекты ---------- */
+@media (max-width: 700px) {
+    .cursor-light {
+        display: none;
+    }
+
+    .bg-warmth {
+        opacity: 0.38;
+        animation-duration: 40s;
+    }
+
+    .bg-photo {
+        transform: translate3d(0, 0, 0) scale(1.03);
+    }
+
+    .container {
+        backdrop-filter: blur(14px) saturate(1.15);
+        -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    }
+}
+
+@media (hover: none) {
+    .home-hero:hover {
+        --lift: 0px;
+    }
+
+    .home-menu-card:hover .home-menu-icon,
+    .home-quick-card:hover .home-quick-icon {
+        transform: none;
+    }
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .bg-warmth {
+        animation: none;
+    }
+
+    .container::before {
+        display: none;
+    }
+
+    .home-heart {
+        animation: none;
+    }
+
+    .js .container {
+        opacity: 1;
+        transform: none;
+    }
+
+    .js.boot-anim.booted header,
+    .js.boot-anim.booted .tabs .tab-btn,
+    .js.boot-anim.booted .tab-content.active > * {
+        animation: none;
+    }
+
+    .record-toast {
+        transition: opacity 0.01ms;
+    }
+}

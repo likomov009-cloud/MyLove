@@ -396,6 +396,14 @@ function updateRandomPhrase() {
     }
     phraseText.textContent = phrase;
     registerPhraseOpened(phrase);
+
+    // Микровзаимодействие: мягкое появление новой фразы
+    const card = phraseText.closest('.phrase-card-random');
+    if (card) {
+        card.classList.remove('phrase-pop');
+        void card.offsetWidth;
+        card.classList.add('phrase-pop');
+    }
 }
 // ---------- ПРОГРЕСС ОТКРЫТЫХ ФРАЗ ----------
 
@@ -1777,14 +1785,24 @@ function stopPlatformer() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Splash
+    // Splash + кинематографическое открытие
     setTimeout(() => {
+        const root = document.documentElement;
+        const reveal = () => {
+            root.classList.add('booted');
+            root.classList.add('boot-anim');
+            setTimeout(() => root.classList.remove('boot-anim'), 3000);
+        };
+
         const splash = document.getElementById('splash');
         if (splash) {
             splash.style.opacity = '0';
-            setTimeout(() => splash.remove(), 500);
+            reveal();
+            setTimeout(() => splash.remove(), 600);
+        } else {
+            reveal();
         }
-    }, 1500);
+    }, 1300);
     
     // Если страница загрузилась не на платформере, убедимся, что игра не крутится
     if (!document.getElementById('platformer')?.classList.contains('active')) {
@@ -4112,6 +4130,22 @@ function setText(id, value) {
     if (el) el.textContent = value;
 }
 
+// Мягкое уведомление о новом рекорде
+let recordToastTimer = null;
+function announceRecord(text) {
+    const toast = document.getElementById('recordToast');
+    if (!toast) return;
+
+    toast.textContent = text;
+    toast.classList.add('show');
+
+    if (recordToastTimer) clearTimeout(recordToastTimer);
+    recordToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        recordToastTimer = null;
+    }, 2600);
+}
+
 
 // =========================================================
 // 💫 ИГРА «ЛОВИ МОМЕНТЫ» — бесконечная процедурная аркада
@@ -4550,7 +4584,10 @@ class CatchGame {
 
     saveBest() {
         const best = Number(localStorage.getItem('catchBestScore') || 0);
-        if (this.score > best) localStorage.setItem('catchBestScore', this.score);
+        if (this.score > best) {
+            localStorage.setItem('catchBestScore', this.score);
+            announceRecord('🏆 Новый рекорд: ' + this.score + '!');
+        }
 
         const bestCombo = Number(localStorage.getItem('catchBestCombo') || 0);
         if (this.bestCombo > bestCombo) localStorage.setItem('catchBestCombo', this.bestCombo);
@@ -5014,7 +5051,10 @@ class FlowGame {
 
     saveBest() {
         const best = Number(localStorage.getItem('flowBestScore') || 0);
-        if (this.score > best) localStorage.setItem('flowBestScore', this.score);
+        if (this.score > best) {
+            localStorage.setItem('flowBestScore', this.score);
+            announceRecord('🏆 Новый рекорд: ' + this.score + '!');
+        }
 
         const bestStreak = Number(localStorage.getItem('flowBestStreak') || 0);
         if (this.bestStreak > bestStreak) localStorage.setItem('flowBestStreak', this.bestStreak);
@@ -5133,3 +5173,251 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.key === 'Escape') closeLightbox();
     });
 });
+
+
+// =========================================================
+// ✨ WOW PASS: живой фон, параллакс, свет и «дыхание» частиц
+// =========================================================
+
+const wowReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wowFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+// ---------- Параллакс фона и реакция интерфейса на курсор ----------
+(function initParallax() {
+    if (wowReducedMotion) return;
+
+    const photo = document.getElementById('bgPhoto');
+    const canvas = document.getElementById('ambientCanvas');
+    const cursorLight = document.getElementById('cursorLight');
+    const hero = document.querySelector('.home-hero');
+
+    if (!photo && !cursorLight && !hero) return;
+
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let rafId = null;
+
+    const maxShift = wowFinePointer ? 14 : 5;
+    const tiltMax = 3.2;
+
+    function render() {
+        rafId = null;
+
+        currentX += (targetX - currentX) * 0.12;
+        currentY += (targetY - currentY) * 0.12;
+
+        if (photo) {
+            photo.style.transform =
+                `translate3d(${(-currentX * maxShift).toFixed(2)}px, ${(-currentY * maxShift).toFixed(2)}px, 0) scale(1.05)`;
+        }
+
+        if (canvas) {
+            canvas.style.transform =
+                `translate3d(${(currentX * 9).toFixed(2)}px, ${(currentY * 9).toFixed(2)}px, 0)`;
+        }
+
+        if (hero && wowFinePointer) {
+            hero.style.setProperty('--tilt-x', (currentX * tiltMax).toFixed(2));
+            hero.style.setProperty('--tilt-y', (-currentY * tiltMax).toFixed(2));
+        }
+
+        const stillMoving =
+            Math.abs(targetX - currentX) > 0.001 ||
+            Math.abs(targetY - currentY) > 0.001;
+
+        if (stillMoving) rafId = requestAnimationFrame(render);
+    }
+
+    function schedule() {
+        if (rafId === null) rafId = requestAnimationFrame(render);
+    }
+
+    window.addEventListener('pointermove', (event) => {
+        if (!wowFinePointer) return;
+        targetX = (event.clientX / window.innerWidth) * 2 - 1;
+        targetY = (event.clientY / window.innerHeight) * 2 - 1;
+
+        if (cursorLight) {
+            cursorLight.style.transform =
+                `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+        }
+
+        schedule();
+    }, { passive: true });
+
+    // Плавный возврат в исходное состояние
+    window.addEventListener('pointerleave', () => {
+        targetX = 0;
+        targetY = 0;
+        schedule();
+    }, { passive: true });
+
+    // Тёплый свет за курсором только на устройствах с мышью
+    if (cursorLight && wowFinePointer) {
+        let shown = false;
+        window.addEventListener('pointermove', () => {
+            if (shown) return;
+            shown = true;
+            cursorLight.classList.add('on');
+        }, { passive: true, once: true });
+    }
+})();
+
+// ---------- Атмосферные частицы: «дыхание любви» ----------
+(function initAmbientHearts() {
+    if (wowReducedMotion) return;
+
+    const canvas = document.getElementById('ambientCanvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+    let particles = [];
+    let rafId = null;
+    let lastTime = 0;
+    let running = false;
+
+    const isSmall = window.innerWidth < 760;
+
+    function makeGlowSprite(size, r, g, b) {
+        const sprite = document.createElement('canvas');
+        sprite.width = sprite.height = size;
+        const sctx = sprite.getContext('2d');
+        const grad = sctx.createRadialGradient(
+            size / 2, size / 2, 0,
+            size / 2, size / 2, size / 2
+        );
+        grad.addColorStop(0, `rgba(${r},${g},${b},0.9)`);
+        grad.addColorStop(0.45, `rgba(${r},${g},${b},0.32)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        sctx.fillStyle = grad;
+        sctx.fillRect(0, 0, size, size);
+        return sprite;
+    }
+
+    function makeHeartSprite(size, r, g, b) {
+        const sprite = document.createElement('canvas');
+        sprite.width = sprite.height = size;
+        const sctx = sprite.getContext('2d');
+        const half = size / 2;
+        sctx.translate(half, half * 0.92);
+        const k = size / 34;
+        sctx.scale(k, k);
+        sctx.beginPath();
+        sctx.moveTo(0, 6);
+        sctx.bezierCurveTo(-9, -8, -18, 5, 0, 17);
+        sctx.bezierCurveTo(18, 5, 9, -8, 0, 6);
+        const grad = sctx.createRadialGradient(-3, -3, 1, 0, 2, 18);
+        grad.addColorStop(0, `rgba(${Math.min(255, r + 40)},${Math.min(255, g + 40)},${Math.min(255, b + 40)},0.95)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0.75)`);
+        sctx.fillStyle = grad;
+        sctx.fill();
+        return sprite;
+    }
+
+    const glowSprites = [
+        makeGlowSprite(128, 255, 205, 170),
+        makeGlowSprite(128, 255, 165, 190),
+        makeGlowSprite(128, 255, 230, 190)
+    ];
+    const heartSprite = makeHeartSprite(64, 255, 120, 150);
+
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function createParticle(seeded) {
+        const heart = Math.random() < 0.28;
+        return {
+            x: Math.random() * width,
+            y: seeded ? Math.random() * height : height + 40,
+            size: heart ? 14 + Math.random() * 16 : 40 + Math.random() * 90,
+            speed: (heart ? 12 : 7) + Math.random() * 16,
+            sway: 8 + Math.random() * 22,
+            swaySpeed: 0.4 + Math.random() * 0.8,
+            phase: Math.random() * Math.PI * 2,
+            alpha: heart ? 0.16 + Math.random() * 0.16 : 0.1 + Math.random() * 0.18,
+            heart,
+            sprite: heart ? heartSprite : glowSprites[Math.floor(Math.random() * glowSprites.length)]
+        };
+    }
+
+    function build() {
+        const count = isSmall ? 12 : 24;
+        particles = [];
+        for (let i = 0; i < count; i++) particles.push(createParticle(true));
+    }
+
+    function frame(timestamp) {
+        if (!running) return;
+
+        if (!lastTime) lastTime = timestamp;
+        const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+        lastTime = timestamp;
+
+        ctx.clearRect(0, 0, width, height);
+
+        for (const p of particles) {
+            p.y -= p.speed * dt;
+            p.phase += p.swaySpeed * dt;
+            const x = p.x + Math.sin(p.phase) * p.sway;
+
+            if (p.y + p.size < -40) {
+                Object.assign(p, createParticle(false));
+            }
+
+            ctx.globalAlpha = p.alpha;
+            ctx.drawImage(p.sprite, x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+        }
+
+        ctx.globalAlpha = 1;
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function start() {
+        if (running) return;
+        running = true;
+        lastTime = 0;
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function stop() {
+        running = false;
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+
+    function handleVisibility() {
+        if (document.hidden) stop();
+        else start();
+    }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            resizeTimer = null;
+            resize();
+            build();
+        }, 250);
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    resize();
+    build();
+    start();
+})();

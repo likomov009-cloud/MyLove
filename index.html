@@ -7,8 +7,33 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f7c1b5">
+    <script>
+        /* Помечаем, что JS активен, и включаем кинематографическое открытие.
+           Если script.js по какой-то причине не загрузится — сработает
+           страховка и контент всё равно станет видимым. */
+        (function () {
+            var root = document.documentElement;
+            root.classList.add('js');
+            window.setTimeout(function () {
+                if (!root.classList.contains('booted')) root.classList.add('booted');
+                var splash = document.getElementById('splash');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    window.setTimeout(function () { splash.remove(); }, 600);
+                }
+            }, 4000);
+        })();
+    </script>
 </head>
 <body>
+
+<!-- Живой фон -->
+<div class="bg-scene" aria-hidden="true">
+    <div class="bg-photo" id="bgPhoto"></div>
+    <div class="bg-warmth"></div>
+    <canvas id="ambientCanvas" class="bg-hearts"></canvas>
+</div>
+<div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
 
 <!-- Splash screen -->
 <div id="splash" class="splash">
@@ -649,6 +674,9 @@
         </button>
     </div>
 </div>
+<!-- Тост нового рекорда -->
+<div id="recordToast" class="record-toast" role="status" aria-live="polite"></div>
+
 <!-- Lightbox галереи -->
 <div id="galleryLightbox" class="lightbox" aria-hidden="true">
     <button id="lightboxClose" class="lightbox-close" aria-label="Закрыть">×</button>
